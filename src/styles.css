@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Fustat:wght@700;800&family=Inter:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-finance-cream font-sans text-finance-text;
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply border border-finance-line bg-finance-paper/95 shadow-sm backdrop-blur-glass;
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl;
+  }
+
+  .touch-target {
+    @apply min-h-11 min-w-11;
+  }
+
+  .interactive {
+    @apply transition duration-200 ease-out active:scale-[0.98] lg:hover:scale-[1.02];
+  }
+
+  .nav-chip {
+    @apply touch-target relative inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ease-out;
+  }
+
+  .nav-chip::after {
+    content: '';
+    @apply absolute bottom-[6px] left-1/2 h-[2px] w-0 -translate-x-1/2 rounded-full bg-finance-paper transition-all duration-200 ease-out;
+  }
+
+  .nav-chip:hover::after {
+    @apply w-6;
+  }
+
+  .nav-chip-active::after {
+    @apply w-8 bg-finance-charcoal;
+  }
+
+  .page-title {
+    @apply font-display text-[24px] font-bold tracking-[-0.03em] text-finance-text sm:text-[28px] lg:text-[32px];
+  }
+
+  .section-title {
+    @apply font-display text-xl font-bold tracking-[-0.03em] text-finance-text;
+  }
+}
+
+.app-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.app-glow::before,
+.app-glow::after {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.55;
+}
+
+.app-glow::before {
+  top: -140px;
+  left: -80px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(253, 241, 232, 0.95), transparent 70%);
+}
+
+.app-glow::after {
+  top: -90px;
+  left: 60px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(130, 201, 215, 0.25), transparent 70%);
+}
