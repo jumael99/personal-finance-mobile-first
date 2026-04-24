@@ -2,7 +2,11 @@ import { createPortal } from 'react-dom';
 import { amountTone, formatCompactDate, formatCurrency, formatShortDate } from '../lib/format';
 
 export function GlassCard({ className = '', children }) {
-  return <section className={`glass-card p-5 ${className}`}>{children}</section>;
+  return (
+    <div className="gradient-shell">
+      <section className={`glass-card p-5 ${className}`}>{children}</section>
+    </div>
+  );
 }
 
 export function SectionHeader({ title, action, subtitle, icon: Icon }) {
@@ -11,7 +15,7 @@ export function SectionHeader({ title, action, subtitle, icon: Icon }) {
       <div>
         <div className="flex items-center gap-2">
           {Icon ? (
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-finance-cream text-finance-charcoal">
+            <span className="surface-inverse grid h-9 w-9 place-items-center rounded-[2px] text-finance-charcoal">
               <Icon size={18} />
             </span>
           ) : null}
@@ -28,28 +32,32 @@ export function MetricCard({ label, value, icon: Icon }) {
   return (
     <GlassCard className="p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-finance-muted">{label}</p>
+        <p className="panel-label">{label}</p>
         {Icon ? (
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-finance-cream text-finance-charcoal">
+          <span className="surface-inverse grid h-10 w-10 place-items-center rounded-[2px] text-finance-charcoal">
             <Icon size={18} />
           </span>
         ) : null}
       </div>
-      <p className="mt-3 font-display text-[28px] font-bold tracking-[-0.04em] text-finance-text sm:text-[32px]">{formatCurrency(value)}</p>
+      <p className="metric-value mt-4 text-finance-text">{formatCurrency(value)}</p>
     </GlassCard>
   );
 }
 
 export function Skeleton({ className = '' }) {
-  return <div className={`animate-pulse rounded-2xl bg-finance-line ${className}`} />;
+  return <div className={`animate-pulse rounded-[2px] bg-finance-charcoal/8 ${className}`} />;
 }
 
 export function EmptyState({ message }) {
-  return <div className="rounded-2xl bg-finance-line px-4 py-6 text-sm text-finance-muted">{message}</div>;
+  return <div className="surface-muted rounded-[2px] px-4 py-6 text-sm text-finance-muted">{message}</div>;
 }
 
 export function ErrorState({ message }) {
-  return <div className="rounded-2xl border border-finance-red/15 bg-finance-red/10 px-4 py-6 text-sm text-finance-red">{message}</div>;
+  return (
+    <div className="gradient-shell">
+      <div className="glass-card px-4 py-6 text-sm text-finance-text">{message}</div>
+    </div>
+  );
 }
 
 export function DonutProgress({ spent, maximum }) {
@@ -61,11 +69,11 @@ export function DonutProgress({ spent, maximum }) {
       <div
         className="relative h-24 w-24 rounded-full"
         style={{
-          background: `conic-gradient(#82C9D7 ${degrees}deg, #F3F3F3 ${degrees}deg)`,
+          background: `conic-gradient(#F47C59 ${degrees}deg, rgba(36, 18, 8, 0.08) ${degrees}deg)`,
         }}
       >
-        <div className="absolute inset-3 grid place-items-center rounded-full bg-finance-paper text-center">
-          <span className="text-sm font-medium text-finance-text">{Math.round(progress)}%</span>
+        <div className="absolute inset-3 grid place-items-center rounded-full bg-finance-paper text-center shadow-sm">
+          <span className="text-sm font-medium text-finance-red">{Math.round(progress)}%</span>
         </div>
       </div>
       <div className="space-y-1 text-sm text-finance-muted">
@@ -79,8 +87,8 @@ export function DonutProgress({ spent, maximum }) {
 
 export function ProgressBar({ value }) {
   return (
-    <div className="h-2 rounded-full bg-finance-line">
-      <div className="h-2 rounded-full bg-finance-cyan" style={{ width: `${Math.min(value, 100)}%` }} />
+    <div className="h-2 rounded-full bg-finance-charcoal/8">
+      <div className="h-2 rounded-full bg-finance-red" style={{ width: `${Math.min(value, 100)}%` }} />
     </div>
   );
 }
@@ -94,11 +102,11 @@ export function TransactionRows({ items, compact = false }) {
     return (
       <div className="flex gap-3 overflow-x-auto pb-1 lg:block lg:overflow-visible">
         {items.map((item) => (
-          <article key={item._id} className="glass-card min-w-[270px] p-4 lg:mb-3 lg:min-w-0">
+          <article key={item._id} className="surface-muted min-w-[270px] rounded-[2px] p-4 lg:mb-3 lg:min-w-0">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-medium text-finance-text">{item.senderRecipient}</p>
-                <p className="mt-1 inline-flex rounded-full bg-finance-line px-2 py-1 text-xs text-finance-muted">{item.category}</p>
+                <p className="mt-1 inline-flex rounded-[9999px] bg-finance-peach px-2 py-1 text-xs uppercase tracking-[0.08em] text-finance-muted">{item.category}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-finance-muted">{formatCompactDate(item.date)}</p>
@@ -115,11 +123,11 @@ export function TransactionRows({ items, compact = false }) {
     <>
       <div className="grid gap-3 md:hidden">
         {items.map((item) => (
-          <article key={item._id} className="glass-card p-4">
+          <article key={item._id} className="surface-muted rounded-[2px] p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-medium text-finance-text">{item.senderRecipient}</p>
-                <p className="mt-1 inline-flex rounded-full bg-finance-line px-2 py-1 text-xs text-finance-muted">{item.category}</p>
+                <p className="mt-1 inline-flex rounded-[9999px] bg-finance-peach px-2 py-1 text-xs uppercase tracking-[0.08em] text-finance-muted">{item.category}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-finance-muted">{formatShortDate(item.date)}</p>
@@ -129,9 +137,9 @@ export function TransactionRows({ items, compact = false }) {
           </article>
         ))}
       </div>
-      <div className="hidden overflow-hidden rounded-2xl md:block">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-finance-line text-finance-muted">
+      <div className="hidden overflow-hidden rounded-[2px] md:block">
+        <table className="data-table w-full text-left text-sm">
+          <thead>
             <tr>
               <th className="px-4 py-3 font-medium">Recipient / Sender</th>
               <th className="px-4 py-3 font-medium">Category</th>
@@ -141,8 +149,8 @@ export function TransactionRows({ items, compact = false }) {
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item._id} className="border-t border-finance-line bg-finance-paper">
-                <td className="px-4 py-4 font-medium text-finance-text">{item.senderRecipient}</td>
+              <tr key={item._id}>
+                <td className="px-4 py-4 font-medium">{item.senderRecipient}</td>
                 <td className="px-4 py-4 text-finance-muted">{item.category}</td>
                 <td className="px-4 py-4 text-finance-muted">{formatShortDate(item.date)}</td>
                 <td className={`px-4 py-4 text-right font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</td>
@@ -164,7 +172,7 @@ export function BillsList({ items, compact = false }) {
     return (
       <div className="space-y-3">
         {items.map((bill) => (
-          <article key={bill._id} className="flex items-center justify-between rounded-2xl bg-finance-line px-4 py-3">
+          <article key={bill._id} className="surface-muted flex items-center justify-between rounded-[2px] px-4 py-3">
             <div>
               <p className="font-medium text-finance-text">{bill.title}</p>
               <p className="text-sm text-finance-muted">{formatShortDate(bill.dueDate)}</p>
@@ -180,7 +188,7 @@ export function BillsList({ items, compact = false }) {
     <>
       <div className="flex gap-3 overflow-x-auto pb-1 md:hidden">
         {items.map((bill) => (
-          <article key={bill._id} className="glass-card min-w-[250px] p-4">
+          <article key={bill._id} className="surface-muted min-w-[250px] rounded-[2px] p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-medium text-finance-text">{bill.title}</p>
@@ -189,14 +197,14 @@ export function BillsList({ items, compact = false }) {
               <p className="font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
             </div>
             {bill.isRecurring ? (
-              <span className="mt-3 inline-flex rounded-full bg-finance-peach px-2 py-1 text-xs text-finance-ochre">Recurring</span>
+              <span className="mt-3 inline-flex rounded-[9999px] bg-finance-peach px-2 py-1 text-xs uppercase tracking-[0.08em] text-finance-red">Recurring</span>
             ) : null}
           </article>
         ))}
       </div>
-      <div className="hidden overflow-hidden rounded-2xl md:block">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-finance-line text-finance-muted">
+      <div className="hidden overflow-hidden rounded-[2px] md:block">
+        <table className="data-table w-full text-left text-sm">
+          <thead>
             <tr>
               <th className="px-4 py-3 font-medium">Bill Title</th>
               <th className="px-4 py-3 font-medium">Due Date</th>
@@ -205,10 +213,10 @@ export function BillsList({ items, compact = false }) {
           </thead>
           <tbody>
             {items.map((bill) => (
-              <tr key={bill._id} className="border-t border-finance-line bg-finance-paper">
-                <td className="px-4 py-4 font-medium text-finance-text">{bill.title}</td>
+              <tr key={bill._id}>
+                <td className="px-4 py-4 font-medium">{bill.title}</td>
                 <td className="px-4 py-4 text-finance-muted">{formatShortDate(bill.dueDate)}</td>
-                <td className="px-4 py-4 text-right font-medium text-finance-text">{formatCurrency(bill.amount)}</td>
+                <td className="px-4 py-4 text-right font-medium">{formatCurrency(bill.amount)}</td>
               </tr>
             ))}
           </tbody>
@@ -221,22 +229,32 @@ export function BillsList({ items, compact = false }) {
 export function Field({ label, children }) {
   return (
     <label className="block space-y-2">
-      <span className="text-sm text-finance-muted">{label}</span>
+      <span className="panel-label">{label}</span>
       {children}
     </label>
   );
 }
 
 export function GlassInput(props) {
-  return <input {...props} className={`glass touch-target w-full rounded-2xl px-4 py-3 text-finance-text outline-none placeholder:text-finance-muted ${props.className || ''}`} />;
+  return (
+    <input
+      {...props}
+      className={`touch-target w-full rounded-[2px] border border-finance-line bg-finance-paper text-finance-text outline-none px-4 py-3 placeholder:text-finance-muted focus:border-finance-red ${props.className || ''}`}
+    />
+  );
 }
 
 export function GlassSelect(props) {
-  return <select {...props} className={`glass touch-target w-full rounded-2xl px-4 py-3 text-finance-text outline-none ${props.className || ''}`} />;
+  return <select {...props} className={`touch-target w-full rounded-[2px] border border-finance-line bg-finance-paper px-4 py-3 text-finance-text outline-none focus:border-finance-red ${props.className || ''}`} />;
 }
 
 export function GlassButton({ className = '', ...props }) {
-  return <button {...props} className={`touch-target interactive inline-flex items-center justify-center gap-2 rounded-2xl border border-finance-charcoal bg-finance-charcoal px-4 py-3 text-sm font-medium text-finance-paper ${className}`} />;
+  return (
+    <button
+      {...props}
+      className={`touch-target interactive inline-flex items-center justify-center gap-2 rounded-none border border-transparent bg-finance-red px-4 py-3 text-sm font-medium uppercase tracking-[1.2px] text-finance-paper hover:bg-finance-charcoal hover:text-finance-paper disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+    />
+  );
 }
 
 export function Modal({ open, title, children, onClose }) {
@@ -245,16 +263,18 @@ export function Modal({ open, title, children, onClose }) {
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-finance-charcoal/30 p-4 md:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-finance-charcoal/12 p-4 backdrop-blur-sm md:items-center">
       <button type="button" aria-label="Close modal" className="absolute inset-0" onClick={onClose} />
-      <div className="glass-card relative w-full max-w-md p-5">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="font-display text-xl font-bold tracking-[-0.03em] text-finance-text">{title}</h3>
-          <GlassButton onClick={onClose} className="px-3 py-2">
-            Close
-          </GlassButton>
+      <div className="gradient-shell relative w-full max-w-md">
+        <div className="glass-card p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h3 className="font-display text-xl font-light tracking-[-0.025em] text-finance-text">{title}</h3>
+            <GlassButton onClick={onClose} className="px-3 py-2">
+              Close
+            </GlassButton>
+          </div>
+          {children}
         </div>
-        {children}
       </div>
     </div>,
     document.body,

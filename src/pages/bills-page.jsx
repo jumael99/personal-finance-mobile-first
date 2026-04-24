@@ -147,16 +147,16 @@ export function BillsPage() {
 
 function SummaryCard({ title, amount, detail, dark = false, tone = 'default' }) {
   const toneClass =
-    tone === 'paid' ? 'text-finance-teal' : tone === 'missed' ? 'text-finance-red' : 'text-finance-text';
+    tone === 'paid' ? 'text-finance-cyan' : tone === 'missed' ? 'text-finance-red' : dark ? 'text-finance-paper' : 'text-finance-text';
 
   return (
     <section
-      className={`min-w-[220px] flex-1 rounded-2xl border p-4 ${
-        dark ? 'border-finance-charcoal bg-finance-charcoal text-finance-paper' : 'border-finance-line bg-finance-paper text-finance-text'
+      className={`min-w-[220px] flex-1 rounded-[2px] border p-4 ${
+        dark ? 'border-finance-charcoal bg-finance-charcoal text-finance-paper shadow-glass' : 'border-finance-line bg-finance-paper/90 text-finance-text shadow-glass backdrop-blur-glass'
       }`}
     >
-      <p className={`text-sm ${dark ? 'text-finance-paper/70' : 'text-finance-muted'}`}>{title}</p>
-      <p className={`mt-3 font-display text-2xl font-bold tracking-[-0.04em] ${dark ? 'text-finance-paper' : toneClass}`}>{amount}</p>
+      <p className={`text-[12px] uppercase tracking-[0.1em] ${dark ? 'text-finance-paper/70' : 'text-finance-muted'}`}>{title}</p>
+      <p className={`mt-3 font-display text-2xl font-light tracking-[-0.025em] ${toneClass}`}>{amount}</p>
       <p className={`mt-2 text-sm ${dark ? 'text-finance-paper/70' : 'text-finance-muted'}`}>{detail}</p>
     </section>
   );

@@ -70,7 +70,7 @@ export function TransactionsPage() {
       <GlassCard>
         <SectionHeader title="Transactions" subtitle={periodLabel} />
         <div className="mb-4 grid gap-3 lg:grid-cols-[1.5fr_1fr_1fr]">
-          <label className="glass flex min-h-11 items-center gap-3 rounded-2xl px-4 py-3">
+          <label className="surface-inverse flex min-h-11 items-center gap-3 rounded-[2px] px-4 py-3">
             <Search size={18} className="text-finance-muted" />
             <input
               value={search}

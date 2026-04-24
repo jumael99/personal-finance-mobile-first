@@ -122,7 +122,7 @@ export function PotsPage() {
               <GlassCard key={pot._id}>
                 <SectionHeader title={pot.name} icon={PiggyBank} subtitle={`Target: ${formatCurrency(pot.target)}`} />
                 <div className="space-y-3">
-                  <p className="font-display text-3xl font-bold tracking-[-0.04em]">{formatCurrency(pot.saved)}</p>
+                  <p className="font-display text-3xl font-light tracking-[-0.025em] text-finance-text">{formatCurrency(pot.saved)}</p>
                   <p className="text-sm text-finance-muted">Progress: {Math.round(progress)}%</p>
                   <ProgressBar value={progress} />
                   <div className="grid gap-3 sm:grid-cols-2">

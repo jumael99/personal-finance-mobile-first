@@ -42,91 +42,95 @@ export function AppShell({ children, user }) {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
-      <div className="app-glow" />
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-10 pt-4 sm:px-6 lg:px-8 lg:pt-[30px]">
+      <div className="app-glow">
+        <span />
+      </div>
+      <div className="relative z-10 mx-auto max-w-[1240px] px-4 pb-10 pt-4 sm:px-6 lg:px-8 lg:pt-6">
         <header className="sticky top-4 z-50 lg:top-[30px]">
-          <div className="mx-auto flex min-h-16 items-center justify-between gap-3 rounded-[22px] border border-finance-charcoal bg-finance-charcoal px-4 py-3 text-finance-paper shadow-sm lg:w-fit lg:gap-3 lg:px-5">
-            <Link to="/overview" className="flex items-center gap-3 rounded-2xl pr-1">
-              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-finance-paper text-finance-charcoal shadow-sm">
-                <Wallet2 size={18} strokeWidth={2.2} />
-              </span>
-              <span className="font-display text-[22px] font-bold leading-none tracking-[-0.05em] text-finance-paper">Finance</span>
-            </Link>
-            <button
-              type="button"
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-              className="touch-target interactive inline-flex items-center justify-center rounded-xl border border-finance-paper/15 bg-finance-paper/10 lg:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-            <nav className="hidden items-center gap-2 lg:flex">
-              {links.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  className={({ isActive }) =>
-                    `nav-chip gap-2 ${
-                      isActive
-                        ? 'nav-chip-active bg-finance-paper text-finance-text shadow-sm'
-                        : 'text-finance-paper/76 hover:bg-finance-paper/10 hover:text-finance-paper'
-                    }`
-                  }
-                >
-                  {({ isActive }) => {
-                    const Icon = link.icon;
-
-                    return (
-                      <>
-                        <Icon size={16} className={isActive ? 'text-finance-teal' : 'text-[#9c9ba1]'} />
-                        <span>{link.label}</span>
-                      </>
-                    );
-                  }}
-                </NavLink>
-              ))}
-              <div className="ml-2 flex items-center gap-1.5 rounded-2xl border border-finance-paper/12 bg-finance-paper/8 px-2.5 py-2.5">
-                <button
-                  type="button"
-                  aria-label="Previous month"
-                  onClick={() => shiftMonth(-1)}
-                  className="touch-target interactive inline-flex items-center justify-center rounded-xl border border-finance-paper/10 bg-finance-paper/8 text-finance-paper hover:bg-finance-paper hover:text-finance-text"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={goToCurrentMonth}
-                  className="interactive rounded-xl px-3.5 py-2.5 text-left hover:bg-finance-paper/10"
-                >
-                  <p className="text-[10px] uppercase leading-4 tracking-[0.18em] text-finance-paper/55">Active Period</p>
-                  <p className="mt-1 font-display text-base leading-5 tracking-[-0.03em] text-finance-paper">{periodLabel}</p>
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next month"
-                  onClick={() => shiftMonth(1)}
-                  className="touch-target interactive inline-flex items-center justify-center rounded-xl border border-finance-paper/10 bg-finance-paper/8 text-finance-paper hover:bg-finance-paper hover:text-finance-text"
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-              <div className="ml-3 flex items-center gap-3 rounded-2xl border border-finance-paper/12 bg-finance-paper/8 px-3 py-2.5">
-                <Avatar user={user} initials={initials} />
-                <div className="min-w-0 text-left">
-                  <p className="truncate text-xs font-medium leading-none text-finance-paper">{user?.name}</p>
-                  <p className="mt-1 truncate text-[11px] leading-none text-finance-paper/65">{user?.email}</p>
-                </div>
-              </div>
+          <div className="gradient-shell mx-auto">
+            <div className="glass mx-auto flex min-h-16 items-center justify-between gap-3 rounded-[2px] px-4 py-3 text-finance-text lg:w-fit lg:gap-3 lg:px-5">
+              <Link to="/overview" className="flex items-center gap-3 rounded-[2px] pr-1">
+                <span className="surface-inverse grid h-10 w-10 place-items-center rounded-[2px] text-finance-charcoal">
+                  <Wallet2 size={18} strokeWidth={2.2} />
+                </span>
+                <span className="font-display text-[22px] font-light leading-none tracking-[-0.025em] text-finance-text">Finance</span>
+              </Link>
               <button
                 type="button"
-                onClick={logout}
-                className="touch-target interactive inline-flex items-center gap-2 rounded-2xl border border-finance-paper/14 bg-finance-paper/10 px-4 py-2.5 text-sm font-medium text-finance-paper hover:bg-finance-paper hover:text-finance-text"
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                className="touch-target interactive surface-muted inline-flex items-center justify-center rounded-[2px] lg:hidden"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                <LogOut size={16} />
-                Logout
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
-            </nav>
+              <nav className="hidden items-center gap-2 lg:flex">
+                {links.map((link) => (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    className={({ isActive }) =>
+                      `nav-chip gap-2 ${
+                        isActive
+                          ? 'nav-chip-active surface-inverse text-finance-text'
+                          : 'text-finance-muted hover:bg-finance-peach hover:text-finance-text'
+                      }`
+                    }
+                  >
+                    {({ isActive }) => {
+                      const Icon = link.icon;
+
+                      return (
+                        <>
+                          <Icon size={16} className={isActive ? 'text-finance-red' : 'text-finance-muted'} />
+                          <span>{link.label}</span>
+                        </>
+                      );
+                    }}
+                  </NavLink>
+                ))}
+                <div className="surface-muted ml-2 flex items-center gap-1.5 rounded-[2px] px-2.5 py-2.5">
+                  <button
+                    type="button"
+                    aria-label="Previous month"
+                    onClick={() => shiftMonth(-1)}
+                    className="touch-target interactive surface-muted inline-flex items-center justify-center rounded-[2px] text-finance-text hover:bg-finance-peach hover:text-finance-text"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goToCurrentMonth}
+                    className="interactive rounded-[2px] px-3.5 py-2.5 text-left hover:bg-finance-peach"
+                  >
+                    <p className="panel-label">Active Period</p>
+                    <p className="mt-1 font-display text-base font-light leading-5 tracking-[-0.025em] text-finance-text">{periodLabel}</p>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next month"
+                    onClick={() => shiftMonth(1)}
+                    className="touch-target interactive surface-muted inline-flex items-center justify-center rounded-[2px] text-finance-text hover:bg-finance-peach hover:text-finance-text"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+                <div className="surface-muted ml-3 flex items-center gap-3 rounded-[2px] px-3 py-2.5">
+                  <Avatar user={user} initials={initials} />
+                  <div className="min-w-0 text-left">
+                    <p className="truncate text-xs font-medium leading-none text-finance-text">{user?.name}</p>
+                    <p className="mt-1 truncate text-[11px] leading-none text-finance-muted">{user?.email}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="touch-target interactive surface-muted inline-flex items-center gap-2 rounded-[2px] px-4 py-2.5 text-sm font-medium text-finance-text hover:bg-finance-peach hover:text-finance-text"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </nav>
+            </div>
           </div>
         </header>
 
@@ -135,72 +139,74 @@ export function AppShell({ children, user }) {
             <button
               type="button"
               aria-label="Close navigation drawer"
-              className="absolute inset-0 bg-finance-charcoal/35"
+              className="absolute inset-0 bg-finance-charcoal/12 backdrop-blur-sm"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="absolute inset-x-4 top-[5.5rem] flex flex-col gap-3.5 rounded-[24px] border border-finance-charcoal bg-finance-charcoal p-4 text-finance-paper shadow-sm">
-              <div className="flex items-center justify-between gap-2 rounded-2xl border border-finance-paper/12 bg-finance-paper/8 px-3 py-3.5">
-                <button
-                  type="button"
-                  aria-label="Previous month"
-                  onClick={() => shiftMonth(-1)}
-                  className="touch-target interactive inline-flex items-center justify-center rounded-xl border border-finance-paper/10 bg-finance-paper/8"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <button type="button" onClick={goToCurrentMonth} className="interactive min-w-0 flex-1 rounded-xl px-3 py-1.5 text-center">
-                  <p className="text-[10px] uppercase leading-4 tracking-[0.18em] text-finance-paper/55">Active Period</p>
-                  <p className="mt-1 font-display text-lg leading-6 tracking-[-0.03em] text-finance-paper">{periodLabel}</p>
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next month"
-                  onClick={() => shiftMonth(1)}
-                  className="touch-target interactive inline-flex items-center justify-center rounded-xl border border-finance-paper/10 bg-finance-paper/8"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-              {links.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `touch-target interactive flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium ${
-                      isActive || location.pathname === link.to
-                        ? 'bg-finance-paper text-finance-text'
-                        : 'text-finance-paper/80 hover:bg-finance-paper/10 hover:text-finance-paper'
-                    }`
-                  }
-                >
-                  {({ isActive }) => {
-                    const Icon = link.icon;
-
-                    return (
-                      <>
-                        <Icon size={18} className={isActive ? 'text-finance-teal' : 'text-[#9c9ba1]'} />
-                        <span>{link.label}</span>
-                      </>
-                    );
-                  }}
-                </NavLink>
-              ))}
-              <div className="mt-1 flex items-center gap-3 rounded-2xl border border-finance-paper/12 bg-finance-paper/8 px-4 py-3.5">
-                <Avatar user={user} initials={initials} />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{user?.name}</p>
-                  <p className="mt-1 truncate text-xs text-finance-paper/70">{user?.email}</p>
+            <div className="gradient-shell absolute inset-x-4 top-[5.5rem]">
+              <div className="glass flex flex-col gap-3.5 rounded-[2px] p-4 text-finance-text">
+                <div className="surface-muted flex items-center justify-between gap-2 rounded-[2px] px-3 py-3.5">
+                  <button
+                    type="button"
+                    aria-label="Previous month"
+                    onClick={() => shiftMonth(-1)}
+                    className="touch-target interactive surface-muted inline-flex items-center justify-center rounded-[2px]"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button type="button" onClick={goToCurrentMonth} className="interactive min-w-0 flex-1 rounded-[2px] px-3 py-1.5 text-center">
+                    <p className="panel-label">Active Period</p>
+                    <p className="mt-1 font-display text-lg font-light leading-6 tracking-[-0.025em] text-finance-text">{periodLabel}</p>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next month"
+                    onClick={() => shiftMonth(1)}
+                    className="touch-target interactive surface-muted inline-flex items-center justify-center rounded-[2px]"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
                 </div>
+                {links.map((link) => (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `touch-target interactive flex items-center gap-3 rounded-[2px] px-4 py-3 text-base font-medium uppercase tracking-[0.08em] ${
+                        isActive || location.pathname === link.to
+                          ? 'surface-inverse text-finance-text'
+                          : 'text-finance-muted hover:bg-finance-peach hover:text-finance-text'
+                      }`
+                    }
+                  >
+                    {({ isActive }) => {
+                      const Icon = link.icon;
+
+                      return (
+                        <>
+                          <Icon size={18} className={isActive ? 'text-finance-red' : 'text-finance-muted'} />
+                          <span>{link.label}</span>
+                        </>
+                      );
+                    }}
+                  </NavLink>
+                ))}
+                <div className="surface-muted mt-1 flex items-center gap-3 rounded-[2px] px-4 py-3.5">
+                  <Avatar user={user} initials={initials} />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-finance-text">{user?.name}</p>
+                    <p className="mt-1 truncate text-xs text-finance-muted">{user?.email}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="touch-target interactive surface-muted inline-flex items-center gap-2 rounded-[2px] px-4 py-3 text-left text-base font-medium hover:bg-finance-peach hover:text-finance-text"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={logout}
-                className="touch-target interactive inline-flex items-center gap-2 rounded-2xl border border-finance-paper/14 bg-finance-paper/10 px-4 py-3 text-left text-base font-medium hover:bg-finance-paper hover:text-finance-text"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
             </div>
           </div>
         ) : null}
@@ -218,13 +224,13 @@ function Avatar({ user, initials }) {
         src={user.picture}
         alt={user.name}
         referrerPolicy="no-referrer"
-        className="h-10 w-10 rounded-2xl border border-finance-paper/15 bg-finance-paper/10 object-cover shadow-sm"
+        className="h-10 w-10 rounded-[2px] border border-finance-line bg-finance-paper object-cover"
       />
     );
   }
 
   return (
-    <div className="grid h-10 w-10 place-items-center rounded-2xl border border-finance-paper/15 bg-finance-paper/12 text-xs font-semibold text-finance-paper shadow-sm">
+    <div className="surface-muted grid h-10 w-10 place-items-center rounded-[2px] text-xs font-semibold text-finance-text">
       {initials}
     </div>
   );

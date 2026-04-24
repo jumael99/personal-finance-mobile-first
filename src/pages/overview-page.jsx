@@ -78,7 +78,7 @@ export function OverviewPage() {
         )}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
         <GlassCard>
           <SectionHeader title="Pot Savings" icon={PiggyBank} subtitle={isLoading ? 'Loading savings...' : `Total Saved: ${formatCurrency(data.potSavings.totalSaved)}`} />
           {isLoading ? (
@@ -90,7 +90,7 @@ export function OverviewPage() {
           ) : (
             <div className="space-y-3">
               {data.potSavings.topPots.map((pot) => (
-                <div key={pot._id} className="rounded-2xl bg-finance-line px-4 py-3">
+                <div key={pot._id} className="surface-muted rounded-[2px] px-4 py-3">
                   <div className="flex items-center justify-between gap-3">
                     <p className="font-medium text-finance-text">{pot.name}</p>
                     <p className="text-sm text-finance-muted">{formatCurrency(pot.saved)}</p>
@@ -121,7 +121,7 @@ export function OverviewPage() {
         </GlassCard>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.7fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.7fr_1fr] lg:items-start">
         <GlassCard>
           <SectionHeader title="Transactions overview" icon={ArrowDownCircle} subtitle={isLoading ? 'transactions are rendering...' : '5 most recent transactions'} />
           {isLoading ? <Skeleton className="h-64" /> : <TransactionRows items={data.transactions.recent} compact />}

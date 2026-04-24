@@ -62,7 +62,7 @@ export function BudgetsPage() {
         </GlassButton>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <GlassCard>
           <SectionHeader title="Budget Categories" icon={WalletCards} subtitle={`Real-time spending against each budget in ${periodLabel}`} />
           <div className="space-y-3">
@@ -74,7 +74,7 @@ export function BudgetsPage() {
               </>
             ) : (
               budgets.data.map((budget) => (
-                <article key={budget._id} className="rounded-2xl border border-finance-line bg-finance-paper p-4">
+                <article key={budget._id} className="surface-muted rounded-[2px] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export function BudgetsPage() {
                   </div>
                   <div className="mt-4 space-y-2 text-sm text-finance-muted">
                     <p>Spent: {formatCurrency(budget.spent)}</p>
-                    <div className="h-2 rounded-full bg-finance-line">
+                    <div className="h-2 rounded-full bg-finance-charcoal/8">
                       <div
                         className={`h-2 rounded-full ${budgetAccent[budget.category] || 'bg-finance-cyan'}`}
                         style={{ width: `${Math.min(budget.progress, 100)}%` }}
@@ -113,7 +113,7 @@ export function BudgetsPage() {
               </>
             ) : (
               spending.data.items.map((item) => (
-                <article key={item._id} className="rounded-2xl border border-finance-line bg-finance-paper p-4">
+                <article key={item._id} className="surface-muted rounded-[2px] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-medium text-finance-text">{item.senderRecipient}</p>
