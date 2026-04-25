@@ -36,6 +36,13 @@ export function useTransactions(params) {
   });
 }
 
+export function useCategories() {
+  return useQuery({
+    queryKey: ['categories'],
+    queryFn: () => api('/categories'),
+  });
+}
+
 export function useBudgets() {
   const { month, year } = usePeriod();
 

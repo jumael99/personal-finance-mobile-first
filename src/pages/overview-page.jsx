@@ -28,6 +28,7 @@ export function OverviewPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['overview'] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
       setForm({
         senderRecipient: 'Manual Balance Top-up',
         amount: '',

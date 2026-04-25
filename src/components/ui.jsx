@@ -1,3 +1,4 @@
+import { ChevronDown, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { amountTone, formatCompactDate, formatCurrency, formatShortDate } from '../lib/format';
 
@@ -96,9 +97,12 @@ export function TransactionRows({ items, compact = false }) {
         {items.map((item) => (
           <article key={item._id} className="glass-card min-w-[270px] p-4 lg:mb-3 lg:min-w-0">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-medium text-finance-text">{item.senderRecipient}</p>
-                <p className="mt-1 inline-flex rounded-full bg-finance-line px-2 py-1 text-xs text-finance-muted">{item.category}</p>
+              <div className="flex min-w-0 items-start gap-3">
+                <TransactionAvatar item={item} />
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-finance-text">{item.senderRecipient}</p>
+                  <p className="mt-1 inline-flex rounded-full bg-finance-line px-2 py-1 text-xs text-finance-muted">{item.category}</p>
+                </div>
               </div>
               <div className="text-right">
                 <p className="text-xs text-finance-muted">{formatCompactDate(item.date)}</p>
@@ -117,9 +121,12 @@ export function TransactionRows({ items, compact = false }) {
         {items.map((item) => (
           <article key={item._id} className="glass-card p-4">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-medium text-finance-text">{item.senderRecipient}</p>
-                <p className="mt-1 inline-flex rounded-full bg-finance-line px-2 py-1 text-xs text-finance-muted">{item.category}</p>
+              <div className="flex min-w-0 items-start gap-3">
+                <TransactionAvatar item={item} />
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-finance-text">{item.senderRecipient}</p>
+                  <p className="mt-1 inline-flex rounded-full bg-finance-line px-2 py-1 text-xs text-finance-muted">{item.category}</p>
+                </div>
               </div>
               <div className="text-right">
                 <p className="text-xs text-finance-muted">{formatShortDate(item.date)}</p>
@@ -142,7 +149,12 @@ export function TransactionRows({ items, compact = false }) {
           <tbody>
             {items.map((item) => (
               <tr key={item._id} className="border-t border-finance-line bg-finance-paper">
-                <td className="px-4 py-4 font-medium text-finance-text">{item.senderRecipient}</td>
+                <td className="px-4 py-4">
+                  <div className="flex items-center gap-3">
+                    <TransactionAvatar item={item} className="h-10 w-10 text-xs" />
+                    <span className="font-medium text-finance-text">{item.senderRecipient}</span>
+                  </div>
+                </td>
                 <td className="px-4 py-4 text-finance-muted">{item.category}</td>
                 <td className="px-4 py-4 text-finance-muted">{formatShortDate(item.date)}</td>
                 <td className={`px-4 py-4 text-right font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</td>
@@ -152,6 +164,25 @@ export function TransactionRows({ items, compact = false }) {
         </table>
       </div>
     </>
+  );
+}
+
+function TransactionAvatar({ item, className = '' }) {
+  const initials = item.senderRecipient
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('');
+
+  if (item.avatar) {
+    return <img src={item.avatar} alt="" className={`h-12 w-12 shrink-0 rounded-2xl object-cover ${className}`} />;
+  }
+
+  return (
+    <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-finance-line text-sm font-medium text-finance-text ${className}`}>
+      {initials || '?'}
+    </span>
   );
 }
 
@@ -235,24 +266,68 @@ export function GlassSelect(props) {
   return <select {...props} className={`glass touch-target w-full rounded-2xl px-4 py-3 text-finance-text outline-none ${props.className || ''}`} />;
 }
 
+export function SelectField({ icon: Icon = ChevronDown, className = '', ...props }) {
+  return (
+    <div className="relative">
+      <GlassSelect {...props} className={`appearance-none pr-11 ${className}`} />
+      <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-finance-muted">
+        <Icon size={16} />
+      </span>
+    </div>
+  );
+}
+
+export function HelperText({ children }) {
+  return <p className="text-xs text-finance-muted">{children}</p>;
+}
+
+export function RadioCard({ checked, label, description, ...props }) {
+  return (
+    <label
+      className={`block cursor-pointer rounded-2xl border px-4 py-3 transition ${
+        checked ? 'border-finance-charcoal bg-finance-paper text-finance-text' : 'border-finance-line bg-finance-paper/70 text-finance-muted'
+      }`}
+    >
+      <input type="radio" className="sr-only" checked={checked} {...props} />
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-medium">{label}</p>
+          {description ? <p className="mt-1 text-xs">{description}</p> : null}
+        </div>
+        <span
+          className={`mt-0.5 h-5 w-5 rounded-full border ${
+            checked ? 'border-finance-charcoal bg-finance-charcoal shadow-[inset_0_0_0_4px_#FFFCF5]' : 'border-finance-line bg-transparent'
+          }`}
+        />
+      </div>
+    </label>
+  );
+}
+
 export function GlassButton({ className = '', ...props }) {
   return <button {...props} className={`touch-target interactive inline-flex items-center justify-center gap-2 rounded-2xl border border-finance-charcoal bg-finance-charcoal px-4 py-3 text-sm font-medium text-finance-paper ${className}`} />;
 }
 
-export function Modal({ open, title, children, onClose }) {
+export function Modal({ open, title, description, children, onClose, maxWidthClassName = 'max-w-md' }) {
   if (!open) {
     return null;
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-finance-charcoal/30 p-4 md:items-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-finance-charcoal/45 p-4 md:items-center">
       <button type="button" aria-label="Close modal" className="absolute inset-0" onClick={onClose} />
-      <div className="glass-card relative w-full max-w-md p-5">
-        <div className="mb-4 flex items-center justify-between gap-3">
+      <div className={`glass-card relative z-10 max-h-[calc(100vh-2rem)] w-full ${maxWidthClassName} overflow-y-auto p-5 sm:p-6`}>
+        <button
+          type="button"
+          aria-label="Close modal"
+          onClick={onClose}
+          className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-finance-line bg-finance-paper text-finance-text transition hover:bg-finance-line"
+        >
+          <X size={18} />
+        </button>
+        <div className="mb-5 pr-12">
           <h3 className="font-display text-xl font-bold tracking-[-0.03em] text-finance-text">{title}</h3>
-          <GlassButton onClick={onClose} className="px-3 py-2">
-            Close
-          </GlassButton>
+          {description ? <p className="mt-2 text-sm leading-6 text-finance-muted">{description}</p> : null}
         </div>
         {children}
       </div>

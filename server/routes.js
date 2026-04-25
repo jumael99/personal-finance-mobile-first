@@ -1,13 +1,27 @@
 import express from 'express';
 import { requireAuth } from './auth.js';
 import { monthDateRange, normalizeBillStatus, parseNumber, resolvePeriod } from './utils.js';
-import { Bill, Budget, Pot, Transaction } from './models.js';
+import { Bill, Budget, Category, Pot, Transaction } from './models.js';
 
 export const router = express.Router();
 
 function stripUserId(payload) {
   const { userId, ...safePayload } = payload;
   return safePayload;
+}
+
+async function ensureCategory(userId, name) {
+  const normalizedName = String(name || '').trim();
+
+  if (!normalizedName) {
+    return null;
+  }
+
+  return Category.findOneAndUpdate(
+    { userId, name: normalizedName },
+    { $setOnInsert: { userId, name: normalizedName } },
+    { new: true, upsert: true, setDefaultsOnInsert: true },
+  );
 }
 
 router.get('/health', (_req, res) => {
@@ -119,7 +133,7 @@ router.get('/transactions', async (req, res, next) => {
       lowest: { amount: 1 },
     };
 
-    const [items, total, categories] = await Promise.all([
+    const [items, total, transactionCategories, budgetCategories, savedCategories] = await Promise.all([
       Transaction.find(query)
         .sort(sortOptions[sort] || sortOptions.latest)
         .skip((page - 1) * limit)
@@ -127,7 +141,13 @@ router.get('/transactions', async (req, res, next) => {
         .lean(),
       Transaction.countDocuments(query),
       Transaction.distinct('category', { userId, date: { $gte: start, $lte: end } }),
+      Budget.distinct('category', { userId }),
+      Category.find({ userId }).sort({ name: 1 }).lean(),
     ]);
+
+    const categories = [...new Set([...transactionCategories, ...budgetCategories, ...savedCategories.map((item) => item.name)])].sort((left, right) =>
+      left.localeCompare(right),
+    );
 
     res.json({
       items,
@@ -150,8 +170,10 @@ router.get('/transactions', async (req, res, next) => {
 
 router.post('/transactions', async (req, res, next) => {
   try {
+    const payload = stripUserId(req.body);
+    await ensureCategory(req.user.id, payload.category);
     const transaction = await Transaction.create({
-      ...stripUserId(req.body),
+      ...payload,
       userId: req.user.id,
     });
     res.status(201).json(transaction);
@@ -223,8 +245,43 @@ router.get('/budgets', async (req, res, next) => {
   }
 });
 
+router.get('/categories', async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const [savedCategories, budgetCategories, transactionCategories] = await Promise.all([
+      Category.find({ userId }).sort({ name: 1 }).lean(),
+      Budget.distinct('category', { userId }),
+      Transaction.distinct('category', { userId }),
+    ]);
+
+    const categories = [...new Set([...savedCategories.map((item) => item.name), ...budgetCategories, ...transactionCategories])].sort((left, right) =>
+      left.localeCompare(right),
+    );
+
+    res.json(categories.map((name) => ({ name })));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/categories', async (req, res, next) => {
+  try {
+    const name = String(req.body?.name || '').trim();
+
+    if (!name) {
+      return res.status(400).json({ message: 'Category name is required' });
+    }
+
+    const category = await ensureCategory(req.user.id, name);
+    return res.status(201).json(category);
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.post('/budgets', async (req, res, next) => {
   try {
+    await ensureCategory(req.user.id, req.body?.category);
     const budget = await Budget.create({
       ...stripUserId(req.body),
       userId: req.user.id,
@@ -237,6 +294,7 @@ router.post('/budgets', async (req, res, next) => {
 
 router.put('/budgets/:id', async (req, res, next) => {
   try {
+    await ensureCategory(req.user.id, req.body?.category);
     const budget = await Budget.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
       stripUserId(req.body),

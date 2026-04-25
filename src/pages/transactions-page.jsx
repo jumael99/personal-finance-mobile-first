@@ -2,9 +2,33 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PlusCircle, Search } from 'lucide-react';
 import { useState } from 'react';
 import { api } from '../lib/api';
-import { ErrorState, Field, GlassButton, GlassCard, GlassInput, GlassSelect, Modal, SectionHeader, Skeleton, TransactionRows } from '../components/ui';
-import { useTransactions } from '../lib/hooks';
+import {
+  ErrorState,
+  Field,
+  GlassButton,
+  GlassCard,
+  GlassInput,
+  HelperText,
+  Modal,
+  RadioCard,
+  SectionHeader,
+  SelectField,
+  Skeleton,
+  TransactionRows,
+} from '../components/ui';
+import { useCategories, useTransactions } from '../lib/hooks';
 import { usePeriod } from '../state/period-context';
+
+function getInitialForm() {
+  return {
+    senderRecipient: '',
+    category: '',
+    amount: '',
+    avatar: '',
+    transactionType: 'sent',
+    date: new Date().toISOString().slice(0, 10),
+  };
+}
 
 export function TransactionsPage() {
   const queryClient = useQueryClient();
@@ -14,15 +38,45 @@ export function TransactionsPage() {
   const [category, setCategory] = useState('all');
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({
-    senderRecipient: '',
-    category: '',
-    date: new Date().toISOString().slice(0, 10),
-    amount: '',
-    type: 'expense',
-  });
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [form, setForm] = useState(getInitialForm);
 
   const { data, isLoading, error } = useTransactions({ search, sort, category, page, limit: 10 });
+  const categories = useCategories();
+
+  const resetModalState = () => {
+    setForm(getInitialForm());
+    setNewCategoryName('');
+    setShowNewCategoryInput(false);
+  };
+
+  const closeModal = () => {
+    resetModalState();
+    setShowModal(false);
+  };
+
+  const invalidateAppData = () => {
+    queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    queryClient.invalidateQueries({ queryKey: ['overview'] });
+    queryClient.invalidateQueries({ queryKey: ['budgets'] });
+    queryClient.invalidateQueries({ queryKey: ['categories'] });
+  };
+
+  const createCategory = useMutation({
+    mutationFn: (name) =>
+      api('/categories', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+      }),
+    onSuccess: (createdCategory) => {
+      invalidateAppData();
+      setForm((current) => ({ ...current, category: createdCategory.name }));
+      setNewCategoryName('');
+      setShowNewCategoryInput(false);
+    },
+  });
+
   const createTransaction = useMutation({
     mutationFn: (payload) =>
       api('/transactions', {
@@ -30,18 +84,9 @@ export function TransactionsPage() {
         body: JSON.stringify(payload),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['overview'] });
-      queryClient.invalidateQueries({ queryKey: ['budgets'] });
-      setForm({
-        senderRecipient: '',
-        category: '',
-        date: new Date().toISOString().slice(0, 10),
-        amount: '',
-        type: 'expense',
-      });
+      invalidateAppData();
       setPage(1);
-      setShowModal(false);
+      closeModal();
     },
   });
 
@@ -49,10 +94,16 @@ export function TransactionsPage() {
     return <ErrorState message={error.message} />;
   }
 
+  if (categories.error) {
+    return <ErrorState message={categories.error.message} />;
+  }
+
   const periodLabel = new Intl.DateTimeFormat('en-US', {
     month: 'long',
     year: 'numeric',
   }).format(new Date(year, month - 1, 1));
+
+  const categoryOptions = categories.data?.map((item) => item.name) || [];
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -63,7 +114,7 @@ export function TransactionsPage() {
         </div>
         <GlassButton className="w-full sm:w-auto" onClick={() => setShowModal(true)}>
           <PlusCircle size={16} />
-          Add new transaction
+          Add New Transaction
         </GlassButton>
       </div>
 
@@ -83,7 +134,7 @@ export function TransactionsPage() {
               aria-label="Search Transaction"
             />
           </label>
-          <GlassSelect
+          <SelectField
             aria-label="Sort transactions"
             value={sort}
             onChange={(event) => {
@@ -97,8 +148,8 @@ export function TransactionsPage() {
             <option value="z-a">Sort by | Z-A</option>
             <option value="highest">Sort by | Highest</option>
             <option value="lowest">Sort by | Lowest</option>
-          </GlassSelect>
-          <GlassSelect
+          </SelectField>
+          <SelectField
             aria-label="Filter by category"
             value={category}
             onChange={(event) => {
@@ -107,12 +158,12 @@ export function TransactionsPage() {
             }}
           >
             <option value="all">Category | All Transactions</option>
-            {data?.categories?.map((item) => (
+            {categoryOptions.map((item) => (
               <option key={item} value={item}>
                 {item}
               </option>
             ))}
-          </GlassSelect>
+          </SelectField>
         </div>
 
         {isLoading ? <Skeleton className="h-80" /> : <TransactionRows items={data.items} />}
@@ -135,41 +186,98 @@ export function TransactionsPage() {
         </div>
       </GlassCard>
 
-      <Modal open={showModal} title="Add new transaction" onClose={() => setShowModal(false)}>
+      <Modal
+        open={showModal}
+        title="Add New Transaction"
+        description="Add a new transaction to track your spending. This helps you monitor your spending habits."
+        onClose={closeModal}
+        maxWidthClassName="max-w-xl"
+      >
         <form
-          className="space-y-4"
+          className="space-y-5"
           onSubmit={(event) => {
             event.preventDefault();
             const numericAmount = Number(form.amount);
+
             createTransaction.mutate({
-              senderRecipient: form.senderRecipient,
+              senderRecipient: form.senderRecipient.trim(),
               category: form.category,
               date: form.date,
-              amount: form.type === 'expense' ? -Math.abs(numericAmount) : Math.abs(numericAmount),
+              avatar: form.avatar.trim(),
+              amount: form.transactionType === 'sent' ? -Math.abs(numericAmount) : Math.abs(numericAmount),
             });
           }}
         >
-          <Field label="Recipient / Sender">
+          <Field label="Recipient / Sender Name">
             <GlassInput
               value={form.senderRecipient}
               onChange={(event) => setForm((current) => ({ ...current, senderRecipient: event.target.value }))}
+              placeholder="e.g. Rainy Days"
               required
             />
           </Field>
-          <Field label="Category">
-            <GlassInput value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))} required />
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Date">
-              <GlassInput type="date" value={form.date} onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))} required />
+
+          <div className="space-y-3">
+            <Field label="Category">
+              <SelectField
+                value={form.category}
+                onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
+                required
+              >
+                <option value="" disabled>
+                  Select A Budget Category
+                </option>
+                {categoryOptions.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </SelectField>
             </Field>
-            <Field label="Type">
-              <GlassSelect value={form.type} onChange={(event) => setForm((current) => ({ ...current, type: event.target.value }))}>
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-              </GlassSelect>
-            </Field>
+
+            <div className="space-y-3 rounded-2xl border border-dashed border-finance-line p-3">
+              <GlassButton
+                type="button"
+                className="w-full border-finance-line bg-finance-paper text-finance-text"
+                onClick={() => setShowNewCategoryInput((current) => !current)}
+              >
+                <PlusCircle size={16} />
+                Add New Category
+              </GlassButton>
+
+              {showNewCategoryInput ? (
+                <div className="space-y-3">
+                  <GlassInput
+                    value={newCategoryName}
+                    onChange={(event) => setNewCategoryName(event.target.value)}
+                    placeholder="New category name"
+                  />
+                  <div className="flex gap-3">
+                    <GlassButton
+                      type="button"
+                      className="flex-1"
+                      disabled={!newCategoryName.trim() || createCategory.isPending}
+                      onClick={() => createCategory.mutate(newCategoryName.trim())}
+                    >
+                      {createCategory.isPending ? 'Saving...' : 'Save Category'}
+                    </GlassButton>
+                    <GlassButton
+                      type="button"
+                      className="flex-1 border-finance-line bg-finance-paper text-finance-text"
+                      onClick={() => {
+                        setShowNewCategoryInput(false);
+                        setNewCategoryName('');
+                      }}
+                    >
+                      Cancel
+                    </GlassButton>
+                  </div>
+                  {createCategory.error ? <ErrorState message={createCategory.error.message} /> : null}
+                </div>
+              ) : null}
+            </div>
           </div>
+
           <Field label="Amount">
             <GlassInput
               type="number"
@@ -177,11 +285,47 @@ export function TransactionsPage() {
               step="0.01"
               value={form.amount}
               onChange={(event) => setForm((current) => ({ ...current, amount: event.target.value }))}
+              placeholder="e.g. 500"
               required
             />
           </Field>
-          <GlassButton type="submit" className="w-full" disabled={createTransaction.isPending}>
-            {createTransaction.isPending ? 'Saving...' : 'Add new transaction'}
+
+          <Field label="Avatar">
+            <GlassInput
+              type="url"
+              value={form.avatar}
+              onChange={(event) => setForm((current) => ({ ...current, avatar: event.target.value }))}
+              placeholder="Paste an image URL for now"
+            />
+            <HelperText>Cloudinary upload can plug into this field later.</HelperText>
+          </Field>
+
+          <div className="space-y-2">
+            <p className="text-sm text-finance-muted">Transaction Type</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <RadioCard
+                name="transactionType"
+                value="sent"
+                checked={form.transactionType === 'sent'}
+                onChange={(event) => setForm((current) => ({ ...current, transactionType: event.target.value }))}
+                label="Sent"
+                description="Adds this as money going out."
+              />
+              <RadioCard
+                name="transactionType"
+                value="received"
+                checked={form.transactionType === 'received'}
+                onChange={(event) => setForm((current) => ({ ...current, transactionType: event.target.value }))}
+                label="Received"
+                description="Adds this as money coming in."
+              />
+            </div>
+          </div>
+
+          {createTransaction.error ? <ErrorState message={createTransaction.error.message} /> : null}
+
+          <GlassButton type="submit" className="w-full" disabled={createTransaction.isPending || createCategory.isPending}>
+            {createTransaction.isPending ? 'Saving...' : 'Add Transaction'}
           </GlassButton>
         </form>
       </Modal>

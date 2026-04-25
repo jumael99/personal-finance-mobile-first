@@ -7,6 +7,15 @@ const transactionSchema = new mongoose.Schema(
     category: { type: String, required: true, trim: true },
     date: { type: Date, required: true },
     amount: { type: Number, required: true },
+    avatar: { type: String, trim: true, default: '' },
+  },
+  { timestamps: true },
+);
+
+const categorySchema = new mongoose.Schema(
+  {
+    userId: { type: String, required: true, index: true },
+    name: { type: String, required: true, trim: true },
   },
   { timestamps: true },
 );
@@ -17,6 +26,7 @@ const budgetSchema = new mongoose.Schema(
     category: { type: String, required: true, trim: true },
     maximum: { type: Number, required: true },
     spent: { type: Number, default: 0 },
+    theme: { type: String, trim: true, default: 'cyan' },
     month: { type: Number, required: true, min: 1, max: 12 },
     year: { type: Number, required: true, min: 2000 },
   },
@@ -50,8 +60,10 @@ const billSchema = new mongoose.Schema(
 );
 
 budgetSchema.index({ userId: 1, category: 1, month: 1, year: 1 }, { unique: true });
+categorySchema.index({ userId: 1, name: 1 }, { unique: true });
 
 export const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
 export const Budget = mongoose.models.Budget || mongoose.model('Budget', budgetSchema);
 export const Pot = mongoose.models.Pot || mongoose.model('Pot', potSchema);
 export const Bill = mongoose.models.Bill || mongoose.model('Bill', billSchema);
+export const Category = mongoose.models.Category || mongoose.model('Category', categorySchema);
