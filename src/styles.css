@@ -112,3 +112,73 @@
   height: 260px;
   background: radial-gradient(circle, rgba(130, 201, 215, 0.25), transparent 70%);
 }
+
+/* ── Themed Calendar ── */
+.calendar-popover {
+  @apply absolute left-0 z-50 mt-2;
+}
+
+.calendar-card {
+  @apply glass rounded-2xl p-4;
+  background: #FFFFFF;
+  box-shadow: 0 16px 48px rgba(39, 39, 48, 0.14), 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+/* Override react-day-picker's default look */
+.calendar-card .rdp-root {
+  --rdp-accent-color: #201F24;
+  --rdp-accent-background-color: #201F24;
+  --rdp-day-width: 40px;
+  --rdp-day-height: 40px;
+  --rdp-font-family: 'Inter', sans-serif;
+}
+
+.calendar-card .rdp-day_button {
+  @apply rounded-xl text-sm font-medium transition-colors;
+  color: #201F24;
+}
+
+.calendar-card .rdp-day_button:hover {
+  background: #F3F3F3;
+}
+
+.calendar-card .rdp-selected .rdp-day_button {
+  background: #201F24;
+  color: #FFFFFF;
+}
+
+.calendar-card .rdp-today .rdp-day_button {
+  box-shadow: inset 0 0 0 2px #82C9D7;
+}
+
+.calendar-card .rdp-month_caption {
+  @apply px-1 py-2;
+}
+
+.calendar-card .rdp-month_caption_label {
+  @apply text-sm font-semibold text-finance-text;
+}
+
+.calendar-card .rdp-weekday {
+  @apply text-xs font-medium text-finance-muted;
+}
+
+.calendar-card .rdp-nav_button {
+  @apply grid h-9 w-9 place-items-center rounded-xl text-finance-muted transition-colors hover:bg-finance-line hover:text-finance-text;
+}
+
+.calendar-card .rdp-nav_button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.calendar-card .rdp-range_start .rdp-day_button,
+.calendar-card .rdp-range_end .rdp-day_button {
+  background: #201F24;
+  color: #FFFFFF;
+}
+
+.calendar-card .rdp-range_middle .rdp-day_button {
+  background: #F3F3F3;
+  border-radius: 0;
+}
