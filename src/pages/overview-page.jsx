@@ -7,6 +7,7 @@ import { useOverview } from '../lib/hooks';
 import { usePeriod } from '../state/period-context';
 import { useToast } from '../state/toast-context';
 import { BillsList, DonutProgress, ErrorState, Field, GlassButton, GlassCard, GlassInput, MetricCard, Modal, SectionHeader, Skeleton, TransactionRows } from '../components/ui';
+import { DatePickerField } from '../components/date-picker-field';
 import { formatCurrency } from '../lib/format';
 
 export function OverviewPage() {
@@ -243,10 +244,9 @@ export function OverviewPage() {
             />
           </Field>
           <Field label="Date">
-            <GlassInput
-              type="date"
+            <DatePickerField
               value={form.date}
-              onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))}
+              onChange={(newDate) => setForm((current) => ({ ...current, date: newDate }))}
               required
             />
           </Field>
