@@ -4,6 +4,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
   * {
     -webkit-font-smoothing: antialiased;
   }
@@ -26,6 +30,20 @@
 
   .glass-card {
     @apply glass rounded-2xl;
+  }
+
+  .overlay-backdrop {
+    background:
+      radial-gradient(circle at top, rgba(253, 241, 232, 0.22), transparent 42%),
+      rgba(39, 39, 48, 0.42);
+    backdrop-filter: blur(6px);
+  }
+
+  .overlay-panel {
+    @apply rounded-[26px] border border-finance-line bg-finance-paper shadow-[0_24px_60px_rgba(39,39,48,0.16)] backdrop-blur-glass;
+    background-image:
+      radial-gradient(circle at top left, rgba(130, 201, 215, 0.12), transparent 34%),
+      linear-gradient(180deg, rgba(255, 252, 245, 0.98), rgba(255, 252, 245, 0.94));
   }
 
   .touch-target {

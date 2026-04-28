@@ -5,10 +5,12 @@ import { api } from '../lib/api';
 import { formatCurrency, formatShortDate } from '../lib/format';
 import { useBills } from '../lib/hooks';
 import { usePeriod } from '../state/period-context';
+import { useToast } from '../state/toast-context';
 import { BillsList, ErrorState, Field, GlassButton, GlassCard, GlassInput, GlassSelect, Modal, SectionHeader, Skeleton } from '../components/ui';
 
 export function BillsPage() {
   const queryClient = useQueryClient();
+  const { toastPromise } = useToast();
   const { month, year } = usePeriod();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('due-date');
@@ -31,6 +33,13 @@ export function BillsPage() {
     },
   });
 
+  const deleteBill = useMutation({
+    mutationFn: (billId) =>
+      api(`/bills/${billId}`, {
+        method: 'DELETE',
+      }),
+  });
+
   const summary = useMemo(() => {
     const items = bills.data || [];
     return {
@@ -49,6 +58,23 @@ export function BillsPage() {
     month: 'long',
     year: 'numeric',
   }).format(new Date(year, month - 1, 1));
+
+  const handleDeleteBill = async (bill) => {
+    await toastPromise(
+      async () => {
+        const result = await deleteBill.mutateAsync(bill._id);
+        queryClient.invalidateQueries({ queryKey: ['bills'] });
+        queryClient.invalidateQueries({ queryKey: ['overview'] });
+        return result;
+      },
+      {
+        loading: `Deleting ${bill.title}...`,
+        success: 'Bill deleted',
+        successDescription: `${bill.title} was removed from recurring bills.`,
+        error: 'Could not delete bill',
+      },
+    );
+  };
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -95,7 +121,11 @@ export function BillsPage() {
           </GlassSelect>
         </div>
 
-        {bills.isLoading ? <Skeleton className="h-80" /> : <BillsList items={bills.data} />}
+        {bills.isLoading ? (
+          <Skeleton className="h-80" />
+        ) : (
+          <BillsList items={bills.data} onDelete={handleDeleteBill} deletingId={deleteBill.isPending ? deleteBill.variables : null} />
+        )}
       </GlassCard>
 
       <Modal open={showModal} title="Add new Recurring Bill" onClose={() => setShowModal(false)}>

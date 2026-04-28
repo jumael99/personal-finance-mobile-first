@@ -5,11 +5,13 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useOverview } from '../lib/hooks';
 import { usePeriod } from '../state/period-context';
+import { useToast } from '../state/toast-context';
 import { BillsList, DonutProgress, ErrorState, Field, GlassButton, GlassCard, GlassInput, MetricCard, Modal, SectionHeader, Skeleton, TransactionRows } from '../components/ui';
 import { formatCurrency } from '../lib/format';
 
 export function OverviewPage() {
   const queryClient = useQueryClient();
+  const { toastPromise } = useToast();
   const { month, year } = usePeriod();
   const { data, isLoading, error } = useOverview();
   const [showAddBalance, setShowAddBalance] = useState(false);
@@ -38,6 +40,20 @@ export function OverviewPage() {
     },
   });
 
+  const deleteTransaction = useMutation({
+    mutationFn: (transactionId) =>
+      api(`/transactions/${transactionId}`, {
+        method: 'DELETE',
+      }),
+  });
+
+  const deleteBill = useMutation({
+    mutationFn: (billId) =>
+      api(`/bills/${billId}`, {
+        method: 'DELETE',
+      }),
+  });
+
   if (error) {
     return <ErrorState message={error.message} />;
   }
@@ -49,6 +65,41 @@ export function OverviewPage() {
 
   const totalBudgetSpent = data?.budgets?.reduce((sum, item) => sum + item.spent, 0) || 0;
   const totalBudgetMax = data?.budgets?.reduce((sum, item) => sum + item.maximum, 0) || 0;
+
+  const handleDeleteTransaction = async (transaction) => {
+    await toastPromise(
+      async () => {
+        const result = await deleteTransaction.mutateAsync(transaction._id);
+        queryClient.invalidateQueries({ queryKey: ['overview'] });
+        queryClient.invalidateQueries({ queryKey: ['transactions'] });
+        queryClient.invalidateQueries({ queryKey: ['budgets'] });
+        return result;
+      },
+      {
+        loading: `Deleting ${transaction.senderRecipient}...`,
+        success: 'Transaction deleted',
+        successDescription: `${transaction.senderRecipient} was removed from your records.`,
+        error: 'Could not delete transaction',
+      },
+    );
+  };
+
+  const handleDeleteBill = async (bill) => {
+    await toastPromise(
+      async () => {
+        const result = await deleteBill.mutateAsync(bill._id);
+        queryClient.invalidateQueries({ queryKey: ['overview'] });
+        queryClient.invalidateQueries({ queryKey: ['bills'] });
+        return result;
+      },
+      {
+        loading: `Deleting ${bill.title}...`,
+        success: 'Bill deleted',
+        successDescription: `${bill.title} was removed from recurring bills.`,
+        error: 'Could not delete bill',
+      },
+    );
+  };
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -118,19 +169,46 @@ export function OverviewPage() {
               </Link>
             }
           />
-          {isLoading ? <Skeleton className="h-36" /> : <BillsList items={data.bills.upcoming} compact />}
+          {isLoading ? (
+            <Skeleton className="h-36" />
+          ) : (
+            <BillsList
+              items={data.bills.upcoming}
+              compact
+              onDelete={handleDeleteBill}
+              deletingId={deleteBill.isPending ? deleteBill.variables : null}
+            />
+          )}
         </GlassCard>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.7fr_1fr]">
         <GlassCard>
           <SectionHeader title="Transactions overview" icon={ArrowDownCircle} subtitle={isLoading ? 'transactions are rendering...' : '5 most recent transactions'} />
-          {isLoading ? <Skeleton className="h-64" /> : <TransactionRows items={data.transactions.recent} compact />}
+          {isLoading ? (
+            <Skeleton className="h-64" />
+          ) : (
+            <TransactionRows
+              items={data.transactions.recent}
+              compact
+              onDelete={handleDeleteTransaction}
+              deletingId={deleteTransaction.isPending ? deleteTransaction.variables : null}
+            />
+          )}
         </GlassCard>
 
         <GlassCard>
           <SectionHeader title="Upcoming Bills" icon={ReceiptText} subtitle={`Next 3 due bills in ${periodLabel}`} />
-          {isLoading ? <Skeleton className="h-64" /> : <BillsList items={data.bills.upcoming} compact />}
+          {isLoading ? (
+            <Skeleton className="h-64" />
+          ) : (
+            <BillsList
+              items={data.bills.upcoming}
+              compact
+              onDelete={handleDeleteBill}
+              deletingId={deleteBill.isPending ? deleteBill.variables : null}
+            />
+          )}
         </GlassCard>
       </div>
 

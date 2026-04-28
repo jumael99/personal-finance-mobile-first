@@ -1,5 +1,6 @@
 import { ChevronDown, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { DeleteAction } from './delete-action';
 import { amountTone, formatCompactDate, formatCurrency, formatShortDate } from '../lib/format';
 
 export function GlassCard({ className = '', children }) {
@@ -86,7 +87,7 @@ export function ProgressBar({ value }) {
   );
 }
 
-export function TransactionRows({ items, compact = false }) {
+export function TransactionRows({ items, compact = false, onDelete, deletingId }) {
   if (!items.length) {
     return <EmptyState message="No transactions found." />;
   }
@@ -104,9 +105,21 @@ export function TransactionRows({ items, compact = false }) {
                   <p className="mt-1 inline-flex rounded-full bg-finance-line px-2 py-1 text-xs text-finance-muted">{item.category}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-finance-muted">{formatCompactDate(item.date)}</p>
-                <p className={`mt-2 font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</p>
+              <div className="flex items-start gap-2">
+                {onDelete ? (
+                  <DeleteAction
+                    label={`Delete transaction for ${item.senderRecipient}`}
+                    onClick={() => {
+                      void onDelete(item);
+                    }}
+                    disabled={deletingId === item._id}
+                    busy={deletingId === item._id}
+                  />
+                ) : null}
+                <div className="text-right">
+                  <p className="text-xs text-finance-muted">{formatCompactDate(item.date)}</p>
+                  <p className={`mt-2 font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</p>
+                </div>
               </div>
             </div>
           </article>
@@ -128,9 +141,21 @@ export function TransactionRows({ items, compact = false }) {
                   <p className="mt-1 inline-flex rounded-full bg-finance-line px-2 py-1 text-xs text-finance-muted">{item.category}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-finance-muted">{formatShortDate(item.date)}</p>
-                <p className={`mt-2 font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</p>
+              <div className="flex items-start gap-2">
+                {onDelete ? (
+                  <DeleteAction
+                    label={`Delete transaction for ${item.senderRecipient}`}
+                    onClick={() => {
+                      void onDelete(item);
+                    }}
+                    disabled={deletingId === item._id}
+                    busy={deletingId === item._id}
+                  />
+                ) : null}
+                <div className="text-right">
+                  <p className="text-xs text-finance-muted">{formatShortDate(item.date)}</p>
+                  <p className={`mt-2 font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</p>
+                </div>
               </div>
             </div>
           </article>
@@ -144,6 +169,7 @@ export function TransactionRows({ items, compact = false }) {
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 text-right font-medium">Amount</th>
+              {onDelete ? <th className="px-4 py-3 text-right font-medium">Delete</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -158,6 +184,18 @@ export function TransactionRows({ items, compact = false }) {
                 <td className="px-4 py-4 text-finance-muted">{item.category}</td>
                 <td className="px-4 py-4 text-finance-muted">{formatShortDate(item.date)}</td>
                 <td className={`px-4 py-4 text-right font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</td>
+                {onDelete ? (
+                  <td className="px-4 py-4 text-right">
+                    <DeleteAction
+                      label={`Delete transaction for ${item.senderRecipient}`}
+                      onClick={() => {
+                        void onDelete(item);
+                      }}
+                      disabled={deletingId === item._id}
+                      busy={deletingId === item._id}
+                    />
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
@@ -186,7 +224,7 @@ function TransactionAvatar({ item, className = '' }) {
   );
 }
 
-export function BillsList({ items, compact = false }) {
+export function BillsList({ items, compact = false, onDelete, deletingId }) {
   if (!items.length) {
     return <EmptyState message="No bills found." />;
   }
@@ -200,7 +238,19 @@ export function BillsList({ items, compact = false }) {
               <p className="font-medium text-finance-text">{bill.title}</p>
               <p className="text-sm text-finance-muted">{formatShortDate(bill.dueDate)}</p>
             </div>
-            <p className="font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
+            <div className="flex items-center gap-2">
+              {onDelete ? (
+                <DeleteAction
+                  label={`Delete bill ${bill.title}`}
+                  onClick={() => {
+                    void onDelete(bill);
+                  }}
+                  disabled={deletingId === bill._id}
+                  busy={deletingId === bill._id}
+                />
+              ) : null}
+              <p className="font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
+            </div>
           </article>
         ))}
       </div>
@@ -217,7 +267,19 @@ export function BillsList({ items, compact = false }) {
                 <p className="font-medium text-finance-text">{bill.title}</p>
                 <p className="mt-1 text-sm text-finance-muted">{formatShortDate(bill.dueDate)}</p>
               </div>
-              <p className="font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
+              <div className="flex items-start gap-2">
+                {onDelete ? (
+                  <DeleteAction
+                    label={`Delete bill ${bill.title}`}
+                    onClick={() => {
+                      void onDelete(bill);
+                    }}
+                    disabled={deletingId === bill._id}
+                    busy={deletingId === bill._id}
+                  />
+                ) : null}
+                <p className="font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
+              </div>
             </div>
             {bill.isRecurring ? (
               <span className="mt-3 inline-flex rounded-full bg-finance-peach px-2 py-1 text-xs text-finance-ochre">Recurring</span>
@@ -232,6 +294,7 @@ export function BillsList({ items, compact = false }) {
               <th className="px-4 py-3 font-medium">Bill Title</th>
               <th className="px-4 py-3 font-medium">Due Date</th>
               <th className="px-4 py-3 text-right font-medium">Amount</th>
+              {onDelete ? <th className="px-4 py-3 text-right font-medium">Delete</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -240,6 +303,18 @@ export function BillsList({ items, compact = false }) {
                 <td className="px-4 py-4 font-medium text-finance-text">{bill.title}</td>
                 <td className="px-4 py-4 text-finance-muted">{formatShortDate(bill.dueDate)}</td>
                 <td className="px-4 py-4 text-right font-medium text-finance-text">{formatCurrency(bill.amount)}</td>
+                {onDelete ? (
+                  <td className="px-4 py-4 text-right">
+                    <DeleteAction
+                      label={`Delete bill ${bill.title}`}
+                      onClick={() => {
+                        void onDelete(bill);
+                      }}
+                      disabled={deletingId === bill._id}
+                      busy={deletingId === bill._id}
+                    />
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
@@ -314,14 +389,14 @@ export function Modal({ open, title, description, children, onClose, maxWidthCla
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-finance-charcoal/45 p-4 md:items-center">
+    <div className="overlay-backdrop fixed inset-0 z-[60] flex items-end justify-center p-4 md:items-center">
       <button type="button" aria-label="Close modal" className="absolute inset-0" onClick={onClose} />
-      <div className={`glass-card relative z-10 max-h-[calc(100vh-2rem)] w-full ${maxWidthClassName} overflow-y-auto p-5 sm:p-6`}>
+      <div className={`overlay-panel relative z-10 max-h-[calc(100vh-2rem)] w-full ${maxWidthClassName} overflow-y-auto p-5 sm:p-6`}>
         <button
           type="button"
           aria-label="Close modal"
           onClick={onClose}
-          className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-finance-line bg-finance-paper text-finance-text transition hover:bg-finance-line"
+          className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-finance-line bg-finance-paper/90 text-finance-text transition hover:bg-finance-cream"
         >
           <X size={18} />
         </button>

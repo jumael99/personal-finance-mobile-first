@@ -18,6 +18,7 @@ import {
 } from '../components/ui';
 import { useCategories, useTransactions } from '../lib/hooks';
 import { usePeriod } from '../state/period-context';
+import { useToast } from '../state/toast-context';
 
 function getInitialForm() {
   return {
@@ -32,6 +33,7 @@ function getInitialForm() {
 
 export function TransactionsPage() {
   const queryClient = useQueryClient();
+  const { toastPromise } = useToast();
   const { month, year } = usePeriod();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('latest');
@@ -90,6 +92,13 @@ export function TransactionsPage() {
     },
   });
 
+  const deleteTransaction = useMutation({
+    mutationFn: (transactionId) =>
+      api(`/transactions/${transactionId}`, {
+        method: 'DELETE',
+      }),
+  });
+
   if (error) {
     return <ErrorState message={error.message} />;
   }
@@ -104,6 +113,22 @@ export function TransactionsPage() {
   }).format(new Date(year, month - 1, 1));
 
   const categoryOptions = categories.data?.map((item) => item.name) || [];
+
+  const handleDeleteTransaction = async (transaction) => {
+    await toastPromise(
+      async () => {
+        const result = await deleteTransaction.mutateAsync(transaction._id);
+        invalidateAppData();
+        return result;
+      },
+      {
+        loading: `Deleting ${transaction.senderRecipient}...`,
+        success: 'Transaction deleted',
+        successDescription: `${transaction.senderRecipient} was removed from your records.`,
+        error: 'Could not delete transaction',
+      },
+    );
+  };
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -166,7 +191,15 @@ export function TransactionsPage() {
           </SelectField>
         </div>
 
-        {isLoading ? <Skeleton className="h-80" /> : <TransactionRows items={data.items} />}
+        {isLoading ? (
+          <Skeleton className="h-80" />
+        ) : (
+          <TransactionRows
+            items={data.items}
+            onDelete={handleDeleteTransaction}
+            deletingId={deleteTransaction.isPending ? deleteTransaction.variables : null}
+          />
+        )}
 
         <div className="mt-5 flex justify-center md:justify-end">
           <div className="flex items-center gap-3">

@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './styles.css';
 import { PeriodProvider } from './state/period-context';
+import { ToastProvider } from './state/toast-context';
 import { UIProvider } from './state/ui-context';
 
 const queryClient = new QueryClient({
@@ -20,11 +21,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <PeriodProvider>
-        <UIProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </UIProvider>
+        <ToastProvider>
+          <UIProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </UIProvider>
+        </ToastProvider>
       </PeriodProvider>
     </QueryClientProvider>
   </React.StrictMode>,

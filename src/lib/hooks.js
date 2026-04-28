@@ -29,10 +29,11 @@ export function useTransactions(params) {
       return acc;
     }, {}),
   );
+  const queryString = searchParams.toString();
 
   return useQuery({
-    queryKey: ['transactions', params],
-    queryFn: () => api(`/transactions?${searchParams.toString()}`),
+    queryKey: ['transactions', month, year, queryString],
+    queryFn: () => api(`/transactions?${queryString}`),
   });
 }
 
@@ -69,9 +70,10 @@ export function useBills(params = {}) {
       return acc;
     }, {}),
   );
+  const queryString = searchParams.toString();
 
   return useQuery({
-    queryKey: ['bills', params],
-    queryFn: () => api(`/bills?${searchParams.toString()}`),
+    queryKey: ['bills', month, year, queryString],
+    queryFn: () => api(`/bills?${queryString}`),
   });
 }

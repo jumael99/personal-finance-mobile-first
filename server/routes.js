@@ -362,18 +362,26 @@ router.delete('/pots/:id', async (req, res, next) => {
 
 router.put('/pots/:id', async (req, res, next) => {
   try {
-    const { amount, action, saved } = stripUserId(req.body);
+    const { amount, action, saved, name, target } = stripUserId(req.body);
     const pot = await Pot.findOne({ _id: req.params.id, userId: req.user.id });
 
     if (!pot) {
       return res.status(404).json({ message: 'Pot not found' });
     }
 
+    if (typeof name === 'string' && name.trim()) {
+      pot.name = name.trim();
+    }
+
+    if (target !== undefined) {
+      pot.target = Math.max(parseNumber(target, pot.target), 0);
+    }
+
     if (typeof saved === 'number') {
-      pot.saved = saved;
+      pot.saved = Math.min(Math.max(saved, 0), pot.target);
     } else {
       const delta = Math.abs(parseNumber(amount, 0));
-      pot.saved = action === 'withdraw' ? Math.max(pot.saved - delta, 0) : pot.saved + delta;
+      pot.saved = action === 'withdraw' ? Math.max(pot.saved - delta, 0) : Math.min(pot.saved + delta, pot.target);
     }
 
     await pot.save();
