@@ -16,13 +16,15 @@ import {
   Skeleton,
   TransactionRows,
 } from '../components/ui';
+import { DatePickerField } from '../components/date-picker-field';
+import { DEFAULT_SENDER_RECIPIENT } from '../lib/form-defaults';
 import { useCategories, useTransactions } from '../lib/hooks';
 import { usePeriod } from '../state/period-context';
 import { useToast } from '../state/toast-context';
 
 function getInitialForm() {
   return {
-    senderRecipient: '',
+    senderRecipient: DEFAULT_SENDER_RECIPIENT,
     category: '',
     amount: '',
     avatar: '',
@@ -246,6 +248,14 @@ export function TransactionsPage() {
               value={form.senderRecipient}
               onChange={(event) => setForm((current) => ({ ...current, senderRecipient: event.target.value }))}
               placeholder="e.g. Rainy Days"
+              required
+            />
+          </Field>
+
+          <Field label="Date">
+            <DatePickerField
+              value={form.date}
+              onChange={(newDate) => setForm((current) => ({ ...current, date: newDate }))}
               required
             />
           </Field>
