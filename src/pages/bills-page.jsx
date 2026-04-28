@@ -7,6 +7,7 @@ import { useBills } from '../lib/hooks';
 import { usePeriod } from '../state/period-context';
 import { useToast } from '../state/toast-context';
 import { BillsList, ErrorState, Field, GlassButton, GlassCard, GlassInput, GlassSelect, Modal, SectionHeader, Skeleton } from '../components/ui';
+import { DatePickerField } from '../components/date-picker-field';
 
 export function BillsPage() {
   const queryClient = useQueryClient();
@@ -146,7 +147,11 @@ export function BillsPage() {
             <GlassInput value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required />
           </Field>
           <Field label="Due Date">
-            <GlassInput type="date" value={form.dueDate} onChange={(event) => setForm((current) => ({ ...current, dueDate: event.target.value }))} required />
+            <DatePickerField
+              value={form.dueDate}
+              onChange={(newDate) => setForm((current) => ({ ...current, dueDate: newDate }))}
+              required
+            />
           </Field>
           <Field label="Amount">
             <GlassInput
