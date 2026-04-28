@@ -1,3 +1,4 @@
+import 'react-day-picker/style.css';
 import { Calendar } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
