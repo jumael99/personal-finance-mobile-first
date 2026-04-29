@@ -4,10 +4,13 @@ import { useMemo, useState } from 'react';
 import { api } from '../lib/api';
 import { usePots } from '../lib/hooks';
 import { formatCurrency } from '../lib/format';
+import { DeleteAction } from '../components/delete-action';
 import { ErrorState, Field, GlassButton, GlassCard, GlassInput, Modal, ProgressBar, SectionHeader, Skeleton } from '../components/ui';
+import { useToast } from '../state/toast-context';
 
 export function PotsPage() {
   const queryClient = useQueryClient();
+  const { toastPromise } = useToast();
   const pots = usePots();
   const [showCompact, setShowCompact] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
@@ -117,6 +120,30 @@ export function PotsPage() {
     },
   });
 
+  const deletePot = useMutation({
+    mutationFn: (potId) =>
+      api(`/pots/${potId}`, {
+        method: 'DELETE',
+      }),
+  });
+
+  const handleDeletePot = async (pot) => {
+    await toastPromise(
+      async () => {
+        const result = await deletePot.mutateAsync(pot._id);
+        queryClient.invalidateQueries({ queryKey: ['pots'] });
+        queryClient.invalidateQueries({ queryKey: ['overview'] });
+        return result;
+      },
+      {
+        loading: `Deleting ${pot.name}...`,
+        success: 'Pot deleted',
+        successDescription: `${pot.name} was removed.`,
+        error: 'Could not delete pot',
+      },
+    );
+  };
+
   if (pots.error) {
     return <ErrorState message={pots.error.message} />;
   }
@@ -172,14 +199,24 @@ export function PotsPage() {
                   icon={PiggyBank}
                   subtitle={`Target: ${formatCurrency(pot.target)}`}
                   action={
-                    <GlassButton
-                      type="button"
-                      className="border-finance-line bg-finance-paper px-3 py-2 text-finance-text"
-                      onClick={() => openEditModal(pot)}
-                    >
-                      <PenSquare size={15} />
-                      Edit
-                    </GlassButton>
+                    <div className="flex items-center gap-1">
+                      <GlassButton
+                        type="button"
+                        className="border-finance-line bg-finance-paper px-3 py-2 text-finance-text"
+                        onClick={() => openEditModal(pot)}
+                      >
+                        <PenSquare size={15} />
+                        Edit
+                      </GlassButton>
+                      <DeleteAction
+                        label={`Delete pot ${pot.name}`}
+                        onClick={() => {
+                          void handleDeletePot(pot);
+                        }}
+                        disabled={deletePot.isPending && deletePot.variables === pot._id}
+                        busy={deletePot.isPending && deletePot.variables === pot._id}
+                      />
+                    </div>
                   }
                 />
                 <div className="space-y-3">

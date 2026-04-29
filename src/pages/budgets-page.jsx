@@ -18,7 +18,9 @@ import {
   SelectField,
   Skeleton,
 } from '../components/ui';
+import { DeleteAction } from '../components/delete-action';
 import { usePeriod } from '../state/period-context';
+import { useToast } from '../state/toast-context';
 
 function getInitialForm() {
   return {
@@ -30,6 +32,7 @@ function getInitialForm() {
 
 export function BudgetsPage() {
   const queryClient = useQueryClient();
+  const { toastPromise } = useToast();
   const { month, year } = usePeriod();
   const budgets = useBudgets();
   const categories = useCategories();
@@ -120,6 +123,13 @@ export function BudgetsPage() {
     },
   });
 
+  const deleteBudget = useMutation({
+    mutationFn: (budgetId) =>
+      api(`/budgets/${budgetId}`, {
+        method: 'DELETE',
+      }),
+  });
+
   if (budgets.error) {
     return <ErrorState message={budgets.error.message} />;
   }
@@ -153,6 +163,22 @@ export function BudgetsPage() {
     }
 
     createBudget.mutate(payload);
+  };
+
+  const handleDeleteBudget = async (budget) => {
+    await toastPromise(
+      async () => {
+        const result = await deleteBudget.mutateAsync(budget._id);
+        invalidateAppData();
+        return result;
+      },
+      {
+        loading: `Deleting ${budget.category} budget...`,
+        success: 'Budget deleted',
+        successDescription: `${budget.category} budget was removed.`,
+        error: 'Could not delete budget',
+      },
+    );
   };
 
   const isSubmitting = createBudget.isPending || updateBudget.isPending;
@@ -209,6 +235,14 @@ export function BudgetsPage() {
                           <PenSquare size={15} />
                           Edit
                         </GlassButton>
+                        <DeleteAction
+                          label={`Delete budget for ${budget.category}`}
+                          onClick={() => {
+                            void handleDeleteBudget(budget);
+                          }}
+                          disabled={deleteBudget.isPending && deleteBudget.variables === budget._id}
+                          busy={deleteBudget.isPending && deleteBudget.variables === budget._id}
+                        />
                       </div>
                     </div>
                     <div className="mt-4 space-y-2 text-sm text-finance-muted">

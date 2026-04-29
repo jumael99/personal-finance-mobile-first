@@ -36,122 +36,117 @@ export function AppShell({ children, user }) {
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <div className="app-glow" />
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-10 pt-4 sm:px-6 lg:px-8 lg:pt-[30px]">
-        <header className="sticky top-4 z-50 lg:top-[30px]">
-          <div className="mx-auto flex min-h-16 items-center justify-between gap-3 rounded-[22px] border border-finance-charcoal bg-finance-charcoal px-4 py-3 text-finance-paper shadow-sm lg:w-fit lg:gap-3 lg:px-5">
-            <Link to="/overview" className="flex items-center gap-3 rounded-2xl pr-1">
-              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-finance-paper text-finance-charcoal shadow-sm">
-                <Wallet2 size={18} strokeWidth={2.2} />
-              </span>
-              <span className="font-display text-[22px] font-bold leading-none tracking-[-0.05em] text-finance-paper">Finance</span>
-            </Link>
-            <button
-              type="button"
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-              className="touch-target interactive inline-flex items-center justify-center rounded-xl border border-finance-paper/15 bg-finance-paper/10 lg:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-            <nav className="hidden items-center gap-2 lg:flex">
-              {links.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  className={({ isActive }) =>
-                    `nav-chip gap-2 ${
-                      isActive
-                        ? 'nav-chip-active bg-finance-paper text-finance-text shadow-sm'
-                        : 'text-finance-paper/76 hover:bg-finance-paper/10 hover:text-finance-paper'
-                    }`
-                  }
-                >
-                  {({ isActive }) => {
-                    const Icon = link.icon;
+      <header className="sticky top-0 z-50 border-b border-finance-charcoal/10 bg-finance-paper/90 backdrop-blur-sm">
+        <div className="mx-auto flex h-14 items-center gap-2 px-4 sm:px-6 lg:px-8 max-w-7xl">
+          <Link to="/overview" className="flex items-center gap-2.5 shrink-0">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-finance-charcoal text-finance-paper">
+              <Wallet2 size={15} strokeWidth={2.2} />
+            </span>
+            <span className="font-display text-lg font-bold tracking-[-0.03em] text-finance-text">Finance</span>
+          </Link>
 
-                    return (
-                      <>
-                        <Icon size={16} className={isActive ? 'text-finance-teal' : 'text-[#9c9ba1]'} />
-                        <span>{link.label}</span>
-                      </>
-                    );
-                  }}
-                </NavLink>
-              ))}
-              <div className="ml-3 flex items-center gap-3 rounded-2xl border border-finance-paper/12 bg-finance-paper/8 px-3 py-2.5">
-                <Avatar user={user} initials={initials} />
-                <div className="min-w-0 text-left">
-                  <p className="truncate text-xs font-medium leading-none text-finance-paper">{user?.name}</p>
-                  <p className="mt-1 truncate text-[11px] leading-none text-finance-paper/65">{user?.email}</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={logout}
-                className="touch-target interactive inline-flex items-center gap-2 rounded-2xl border border-finance-paper/14 bg-finance-paper/10 px-4 py-2.5 text-sm font-medium text-finance-paper hover:bg-finance-paper hover:text-finance-text"
+          <nav className="hidden items-center gap-0.5 ml-2 sm:flex">
+            {links.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  `inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'text-finance-text'
+                      : 'text-finance-muted hover:text-finance-text'
+                  }`
+                }
               >
-                <LogOut size={16} />
-                Logout
-              </button>
-            </nav>
-          </div>
-        </header>
+                {({ isActive }) => {
+                  const Icon = link.icon;
+                  return (
+                    <>
+                      <Icon size={16} className={isActive ? 'text-finance-teal' : ''} />
+                      <span className="hidden lg:inline">{link.label}</span>
+                    </>
+                  );
+                }}
+              </NavLink>
+            ))}
+          </nav>
 
-        {mobileMenuOpen ? (
-          <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="flex-1" />
+
+          <div className="flex items-center gap-1.5">
+            <Avatar user={user} initials={initials} />
             <button
               type="button"
-              aria-label="Close navigation drawer"
-              className="absolute inset-0 bg-finance-charcoal/35"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <div className="absolute inset-x-4 top-[5.5rem] flex flex-col gap-3.5 rounded-[24px] border border-finance-charcoal bg-finance-charcoal p-4 text-finance-paper shadow-sm">
-              {links.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `touch-target interactive flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium ${
-                      isActive || location.pathname === link.to
-                        ? 'bg-finance-paper text-finance-text'
-                        : 'text-finance-paper/80 hover:bg-finance-paper/10 hover:text-finance-paper'
-                    }`
-                  }
-                >
-                  {({ isActive }) => {
-                    const Icon = link.icon;
+              onClick={logout}
+              aria-label="Logout"
+              title="Logout"
+              className="grid h-8 w-8 place-items-center rounded-lg text-finance-muted transition-colors hover:bg-finance-line hover:text-finance-text"
+            >
+              <LogOut size={15} />
+            </button>
+          </div>
 
-                    return (
-                      <>
-                        <Icon size={18} className={isActive ? 'text-finance-teal' : 'text-[#9c9ba1]'} />
-                        <span>{link.label}</span>
-                      </>
-                    );
-                  }}
-                </NavLink>
-              ))}
-              <div className="mt-1 flex items-center gap-3 rounded-2xl border border-finance-paper/12 bg-finance-paper/8 px-4 py-3.5">
+          <button
+            type="button"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            className="grid h-9 w-9 place-items-center rounded-lg text-finance-text sm:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+      </header>
+
+      {mobileMenuOpen ? (
+        <div className="fixed inset-0 z-40 sm:hidden">
+          <button
+            type="button"
+            aria-label="Close navigation drawer"
+            className="absolute inset-0 bg-finance-charcoal/25"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <nav className="absolute inset-x-0 top-14 flex flex-col gap-1 border-b border-finance-line bg-finance-paper px-4 pb-4 pt-3 shadow-sm">
+            {links.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                onClick={() => setMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                    isActive || location.pathname === link.to
+                      ? 'bg-finance-charcoal text-finance-paper'
+                      : 'text-finance-text hover:bg-finance-line'
+                  }`
+                }
+              >
+                {({ isActive }) => {
+                  const Icon = link.icon;
+                  return <Icon size={18} className={isActive ? 'text-finance-teal' : ''} />;
+                }}
+                <span>{link.label}</span>
+              </NavLink>
+            ))}
+            <div className="mt-2 flex items-center justify-between border-t border-finance-line pt-3">
+              <div className="flex items-center gap-3">
                 <Avatar user={user} initials={initials} />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{user?.name}</p>
-                  <p className="mt-1 truncate text-xs text-finance-paper/70">{user?.email}</p>
+                  <p className="truncate text-sm font-medium text-finance-text">{user?.name}</p>
+                  <p className="truncate text-xs text-finance-muted">{user?.email}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={logout}
-                className="touch-target interactive inline-flex items-center gap-2 rounded-2xl border border-finance-paper/14 bg-finance-paper/10 px-4 py-3 text-left text-base font-medium hover:bg-finance-paper hover:text-finance-text"
+                className="grid h-10 w-10 place-items-center rounded-xl text-finance-muted hover:bg-finance-line hover:text-finance-text"
               >
                 <LogOut size={18} />
-                Logout
               </button>
             </div>
-          </div>
-        ) : null}
+          </nav>
+        </div>
+      ) : null}
 
-        <main className="pt-6 lg:pt-10">{children}</main>
-      </div>
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pt-8">{children}</main>
     </div>
   );
 }
@@ -163,13 +158,13 @@ function Avatar({ user, initials }) {
         src={user.picture}
         alt={user.name}
         referrerPolicy="no-referrer"
-        className="h-10 w-10 rounded-2xl border border-finance-paper/15 bg-finance-paper/10 object-cover shadow-sm"
+        className="h-8 w-8 rounded-full border border-finance-line object-cover"
       />
     );
   }
 
   return (
-    <div className="grid h-10 w-10 place-items-center rounded-2xl border border-finance-paper/15 bg-finance-paper/12 text-xs font-semibold text-finance-paper shadow-sm">
+    <div className="grid h-8 w-8 place-items-center rounded-full bg-finance-charcoal text-[11px] font-medium text-finance-paper">
       {initials}
     </div>
   );
