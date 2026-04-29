@@ -6,7 +6,7 @@ import { formatCurrency, formatShortDate } from '../lib/format';
 import { useBills } from '../lib/hooks';
 import { usePeriod } from '../state/period-context';
 import { useToast } from '../state/toast-context';
-import { BillsList, ErrorState, Field, GlassButton, GlassCard, GlassInput, GlassSelect, Modal, SectionHeader, Skeleton } from '../components/ui';
+import { BillsList, ErrorState, Field, GlassButton, GlassCard, GlassInput, GlassSelect, Modal, PeriodSelector, SectionHeader, Skeleton } from '../components/ui';
 import { DatePickerField } from '../components/date-picker-field';
 
 export function BillsPage() {
@@ -16,7 +16,7 @@ export function BillsPage() {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('due-date');
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ title: '', dueDate: '', amount: '', isRecurring: true });
+  const [form, setForm] = useState({ title: '', dueDate: '', amount: '', isRecurring: true, dayOfMonth: '' });
 
   const bills = useBills({ search, sort });
 
@@ -30,7 +30,21 @@ export function BillsPage() {
       queryClient.invalidateQueries({ queryKey: ['bills'] });
       queryClient.invalidateQueries({ queryKey: ['overview'] });
       setShowModal(false);
-      setForm({ title: '', dueDate: '', amount: '', isRecurring: true });
+      setForm({ title: '', dueDate: '', amount: '', isRecurring: true, dayOfMonth: '' });
+    },
+  });
+
+  const createBillTemplate = useMutation({
+    mutationFn: (payload) =>
+      api('/bill-templates', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bills'] });
+      queryClient.invalidateQueries({ queryKey: ['overview'] });
+      setShowModal(false);
+      setForm({ title: '', dueDate: '', amount: '', isRecurring: true, dayOfMonth: '' });
     },
   });
 
@@ -84,10 +98,13 @@ export function BillsPage() {
           <h1 className="page-title">Recurring Bills</h1>
           <p className="mt-2 text-sm text-finance-muted">Monitor bills, payment status, and due dates for {periodLabel}.</p>
         </div>
-        <GlassButton className="w-full sm:w-auto" onClick={() => setShowModal(true)}>
-          <PlusCircle size={16} />
-          Add new Recurring Bill
-        </GlassButton>
+        <div className="flex items-center gap-3">
+          <PeriodSelector />
+          <GlassButton className="sm:w-auto" onClick={() => setShowModal(true)}>
+            <PlusCircle size={16} />
+            Add new Recurring Bill
+          </GlassButton>
+        </div>
       </div>
 
       <div className="flex gap-3 overflow-x-auto pb-1">
@@ -134,25 +151,47 @@ export function BillsPage() {
           className="space-y-4"
           onSubmit={(event) => {
             event.preventDefault();
-            createBill.mutate({
-              title: form.title,
-              dueDate: form.dueDate,
-              amount: Number(form.amount),
-              isRecurring: form.isRecurring,
-              status: 'upcoming',
-            });
+            if (form.isRecurring) {
+              createBillTemplate.mutate({
+                title: form.title,
+                amount: Number(form.amount),
+                dayOfMonth: Number(form.dayOfMonth),
+              });
+            } else {
+              createBill.mutate({
+                title: form.title,
+                dueDate: form.dueDate,
+                amount: Number(form.amount),
+                isRecurring: false,
+                status: 'upcoming',
+              });
+            }
           }}
         >
           <Field label="Bill Title">
             <GlassInput value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required />
           </Field>
-          <Field label="Due Date">
-            <DatePickerField
-              value={form.dueDate}
-              onChange={(newDate) => setForm((current) => ({ ...current, dueDate: newDate }))}
-              required
-            />
-          </Field>
+          {form.isRecurring ? (
+            <Field label="Day of Month">
+              <GlassInput
+                type="number"
+                min="1"
+                max="31"
+                value={form.dayOfMonth}
+                onChange={(event) => setForm((current) => ({ ...current, dayOfMonth: event.target.value }))}
+                placeholder="e.g. 15"
+                required
+              />
+            </Field>
+          ) : (
+            <Field label="Due Date">
+              <DatePickerField
+                value={form.dueDate}
+                onChange={(newDate) => setForm((current) => ({ ...current, dueDate: newDate }))}
+                required
+              />
+            </Field>
+          )}
           <Field label="Amount">
             <GlassInput
               type="number"
@@ -171,8 +210,8 @@ export function BillsPage() {
             />
             Mark as recurring
           </label>
-          <GlassButton type="submit" className="w-full" disabled={createBill.isPending}>
-            {createBill.isPending ? 'Saving...' : 'Create Bill'}
+          <GlassButton type="submit" className="w-full" disabled={createBill.isPending || createBillTemplate.isPending}>
+            {createBill.isPending || createBillTemplate.isPending ? 'Saving...' : 'Create Bill'}
           </GlassButton>
         </form>
       </Modal>

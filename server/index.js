@@ -6,6 +6,7 @@ import session from 'express-session';
 import { authRouter } from './auth.js';
 import { connectDatabase } from './db.js';
 import { syncModelIndexes } from './indexes.js';
+import { migrateRecurringBills } from './migrate.js';
 import { router } from './routes.js';
 
 dotenv.config();
@@ -58,6 +59,7 @@ app.use((error, _req, res, _next) => {
 connectDatabase()
   .then(async () => {
     await syncModelIndexes();
+    await migrateRecurringBills();
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
     });

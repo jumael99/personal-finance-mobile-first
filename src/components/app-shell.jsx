@@ -1,8 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ArrowLeftRight, ChevronLeft, ChevronRight, LayoutDashboard, LogOut, Menu, PiggyBank, ReceiptText, Wallet2, X } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, LogOut, Menu, PiggyBank, ReceiptText, Wallet2, X } from 'lucide-react';
 import { api } from '../lib/api';
-import { usePeriod } from '../state/period-context';
 import { useUI } from '../state/ui-context';
 
 const links = [
@@ -17,7 +16,6 @@ export function AppShell({ children, user }) {
   const { mobileMenuOpen, setMobileMenuOpen } = useUI();
   const queryClient = useQueryClient();
   const location = useLocation();
-  const { month, year, goToCurrentMonth, shiftMonth } = usePeriod();
 
   const logout = async () => {
     await api('/auth/logout', { method: 'POST' });
@@ -34,11 +32,6 @@ export function AppShell({ children, user }) {
         .join('')
         .toUpperCase()
     : 'U';
-
-  const periodLabel = new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(year, month - 1, 1));
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -85,32 +78,6 @@ export function AppShell({ children, user }) {
                   }}
                 </NavLink>
               ))}
-              <div className="ml-2 flex items-center gap-1.5 rounded-2xl border border-finance-paper/12 bg-finance-paper/8 px-2.5 py-2.5">
-                <button
-                  type="button"
-                  aria-label="Previous month"
-                  onClick={() => shiftMonth(-1)}
-                  className="touch-target interactive inline-flex items-center justify-center rounded-xl border border-finance-paper/10 bg-finance-paper/8 text-finance-paper hover:bg-finance-paper hover:text-finance-text"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={goToCurrentMonth}
-                  className="interactive rounded-xl px-3.5 py-2.5 text-left hover:bg-finance-paper/10"
-                >
-                  <p className="text-[10px] uppercase leading-4 tracking-[0.18em] text-finance-paper/55">Active Period</p>
-                  <p className="mt-1 font-display text-base leading-5 tracking-[-0.03em] text-finance-paper">{periodLabel}</p>
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next month"
-                  onClick={() => shiftMonth(1)}
-                  className="touch-target interactive inline-flex items-center justify-center rounded-xl border border-finance-paper/10 bg-finance-paper/8 text-finance-paper hover:bg-finance-paper hover:text-finance-text"
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
               <div className="ml-3 flex items-center gap-3 rounded-2xl border border-finance-paper/12 bg-finance-paper/8 px-3 py-2.5">
                 <Avatar user={user} initials={initials} />
                 <div className="min-w-0 text-left">
@@ -139,28 +106,6 @@ export function AppShell({ children, user }) {
               onClick={() => setMobileMenuOpen(false)}
             />
             <div className="absolute inset-x-4 top-[5.5rem] flex flex-col gap-3.5 rounded-[24px] border border-finance-charcoal bg-finance-charcoal p-4 text-finance-paper shadow-sm">
-              <div className="flex items-center justify-between gap-2 rounded-2xl border border-finance-paper/12 bg-finance-paper/8 px-3 py-3.5">
-                <button
-                  type="button"
-                  aria-label="Previous month"
-                  onClick={() => shiftMonth(-1)}
-                  className="touch-target interactive inline-flex items-center justify-center rounded-xl border border-finance-paper/10 bg-finance-paper/8"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <button type="button" onClick={goToCurrentMonth} className="interactive min-w-0 flex-1 rounded-xl px-3 py-1.5 text-center">
-                  <p className="text-[10px] uppercase leading-4 tracking-[0.18em] text-finance-paper/55">Active Period</p>
-                  <p className="mt-1 font-display text-lg leading-6 tracking-[-0.03em] text-finance-paper">{periodLabel}</p>
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next month"
-                  onClick={() => shiftMonth(1)}
-                  className="touch-target interactive inline-flex items-center justify-center rounded-xl border border-finance-paper/10 bg-finance-paper/8"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
               {links.map((link) => (
                 <NavLink
                   key={link.to}

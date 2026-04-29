@@ -59,11 +59,23 @@ const billSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+const billTemplateSchema = new mongoose.Schema(
+  {
+    userId: { type: String, required: true, index: true },
+    title: { type: String, required: true, trim: true },
+    amount: { type: Number, required: true },
+    dayOfMonth: { type: Number, required: true, min: 1, max: 31 },
+  },
+  { timestamps: true },
+);
+
 budgetSchema.index({ userId: 1, category: 1, month: 1, year: 1 }, { unique: true });
 categorySchema.index({ userId: 1, name: 1 }, { unique: true });
+billTemplateSchema.index({ userId: 1, title: 1 }, { unique: true });
 
 export const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
 export const Budget = mongoose.models.Budget || mongoose.model('Budget', budgetSchema);
 export const Pot = mongoose.models.Pot || mongoose.model('Pot', potSchema);
 export const Bill = mongoose.models.Bill || mongoose.model('Bill', billSchema);
+export const BillTemplate = mongoose.models.BillTemplate || mongoose.model('BillTemplate', billTemplateSchema);
 export const Category = mongoose.models.Category || mongoose.model('Category', categorySchema);

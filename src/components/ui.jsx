@@ -1,7 +1,8 @@
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { DeleteAction } from './delete-action';
 import { amountTone, formatCompactDate, formatCurrency, formatShortDate } from '../lib/format';
+import { usePeriod } from '../state/period-context';
 
 export function GlassCard({ className = '', children }) {
   return <section className={`glass-card p-5 ${className}`}>{children}</section>;
@@ -408,5 +409,42 @@ export function Modal({ open, title, description, children, onClose, maxWidthCla
       </div>
     </div>,
     document.body,
+  );
+}
+
+export function PeriodSelector() {
+  const { month, year, goToCurrentMonth, shiftMonth } = usePeriod();
+
+  const label = new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(year, month - 1, 1));
+
+  return (
+    <div className="inline-flex items-center gap-1 rounded-xl border border-finance-line bg-finance-paper px-2 py-1.5">
+      <button
+        type="button"
+        aria-label="Previous month"
+        onClick={() => shiftMonth(-1)}
+        className="touch-target interactive grid h-8 w-8 place-items-center rounded-lg text-finance-muted hover:bg-finance-cream hover:text-finance-text"
+      >
+        <ChevronLeft size={16} />
+      </button>
+      <button
+        type="button"
+        onClick={goToCurrentMonth}
+        className="interactive rounded-lg px-2 py-1 text-sm font-medium text-finance-text hover:bg-finance-cream"
+      >
+        {label}
+      </button>
+      <button
+        type="button"
+        aria-label="Next month"
+        onClick={() => shiftMonth(1)}
+        className="touch-target interactive grid h-8 w-8 place-items-center rounded-lg text-finance-muted hover:bg-finance-cream hover:text-finance-text"
+      >
+        <ChevronRight size={16} />
+      </button>
+    </div>
   );
 }

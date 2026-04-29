@@ -1,7 +1,7 @@
 import express from 'express';
 import { requireAuth } from './auth.js';
 import { monthDateRange, normalizeBillStatus, parseNumber, resolvePeriod } from './utils.js';
-import { Bill, Budget, Category, Pot, Transaction } from './models.js';
+import { Bill, BillTemplate, Budget, Category, Pot, Transaction } from './models.js';
 
 export const router = express.Router();
 
@@ -22,6 +22,34 @@ async function ensureCategory(userId, name) {
     { $setOnInsert: { userId, name: normalizedName } },
     { new: true, upsert: true, setDefaultsOnInsert: true },
   );
+}
+
+function daysInMonth(year, month) {
+  return new Date(year, month, 0).getDate();
+}
+
+async function generateMonthlyBills(userId, month, year) {
+  const templates = await BillTemplate.find({ userId }).lean();
+
+  for (const template of templates) {
+    const day = Math.min(template.dayOfMonth, daysInMonth(year, month));
+    const dueDate = new Date(year, month - 1, day);
+
+    await Bill.findOneAndUpdate(
+      { userId, title: template.title, dueDate, isRecurring: true },
+      {
+        $setOnInsert: {
+          userId,
+          title: template.title,
+          dueDate,
+          amount: template.amount,
+          isRecurring: true,
+          status: 'upcoming',
+        },
+      },
+      { upsert: true, setDefaultsOnInsert: true },
+    );
+  }
 }
 
 router.get('/health', (_req, res) => {
@@ -111,7 +139,15 @@ router.get('/transactions', async (req, res, next) => {
     const query = { userId, date: { $gte: start, $lte: end } };
 
     if (search) {
-      query.senderRecipient = { $regex: search, $options: 'i' };
+      const orConditions = [
+        { senderRecipient: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } },
+      ];
+      const searchNum = Number(search);
+      if (!Number.isNaN(searchNum)) {
+        orConditions.push({ amount: searchNum });
+      }
+      query.$or = orConditions;
     }
 
     if (category && category !== 'all') {
@@ -391,16 +427,118 @@ router.put('/pots/:id', async (req, res, next) => {
   }
 });
 
+router.get('/bill-templates', async (req, res, next) => {
+  try {
+    const templates = await BillTemplate.find({ userId: req.user.id }).sort({ title: 1 }).lean();
+    res.json(templates);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/bill-templates', async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { title, amount, dayOfMonth } = req.body;
+
+    if (!title || !amount || !dayOfMonth) {
+      return res.status(400).json({ message: 'Title, amount, and day of month are required' });
+    }
+
+    const template = await BillTemplate.create({ userId, title: title.trim(), amount: Number(amount), dayOfMonth: Number(dayOfMonth) });
+
+    // Create the first monthly instance for the current month
+    const now = new Date();
+    const day = Math.min(template.dayOfMonth, daysInMonth(now.getFullYear(), now.getMonth() + 1));
+    await Bill.create({
+      userId,
+      title: template.title,
+      dueDate: new Date(now.getFullYear(), now.getMonth(), day),
+      amount: template.amount,
+      isRecurring: true,
+      status: 'upcoming',
+    });
+
+    res.status(201).json(template);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/bill-templates/:id', async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const template = await BillTemplate.findOneAndUpdate(
+      { _id: req.params.id, userId },
+      {
+        ...(req.body.title ? { title: req.body.title.trim() } : {}),
+        ...(req.body.amount !== undefined ? { amount: Number(req.body.amount) } : {}),
+        ...(req.body.dayOfMonth !== undefined ? { dayOfMonth: Number(req.body.dayOfMonth) } : {}),
+      },
+      { new: true, runValidators: true },
+    );
+
+    if (!template) {
+      return res.status(404).json({ message: 'Bill template not found' });
+    }
+
+    // Update all unpaid future instances
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    await Bill.updateMany(
+      { userId, title: template.title, isRecurring: true, dueDate: { $gte: today }, status: { $ne: 'paid' } },
+      { $set: { title: req.body.title?.trim() || template.title, amount: template.amount } },
+    );
+
+    res.json(template);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/bill-templates/:id', async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const template = await BillTemplate.findOneAndDelete({ _id: req.params.id, userId });
+
+    if (!template) {
+      return res.status(404).json({ message: 'Bill template not found' });
+    }
+
+    // Delete all unpaid future instances
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    await Bill.deleteMany({ userId, title: template.title, isRecurring: true, dueDate: { $gte: today }, status: { $ne: 'paid' } });
+
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get('/bills', async (req, res, next) => {
   try {
     const { month, year } = resolvePeriod(req.query);
     const { start, end } = monthDateRange(month, year);
     const search = (req.query.search || '').trim();
     const sort = req.query.sort || 'due-date';
-    const query = { userId: req.user.id, dueDate: { $gte: start, $lte: end } };
+    const userId = req.user.id;
+
+    await generateMonthlyBills(userId, month, year);
+
+    const query = { userId, dueDate: { $gte: start, $lte: end } };
 
     if (search) {
-      query.title = { $regex: search, $options: 'i' };
+      const orConditions = [
+        { title: { $regex: search, $options: 'i' } },
+      ];
+      const searchNum = Number(search);
+      if (!Number.isNaN(searchNum)) {
+        orConditions.push({ amount: searchNum });
+      }
+      query.$or = orConditions;
     }
 
     const sortOptions = {
@@ -454,10 +592,21 @@ router.put('/bills/:id', async (req, res, next) => {
 
 router.delete('/bills/:id', async (req, res, next) => {
   try {
-    const bill = await Bill.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+    const userId = req.user.id;
+    const bill = await Bill.findOneAndDelete({ _id: req.params.id, userId });
 
     if (!bill) {
       return res.status(404).json({ message: 'Bill not found' });
+    }
+
+    // If this was a recurring bill, also remove the template
+    if (bill.isRecurring) {
+      await BillTemplate.findOneAndDelete({ userId, title: bill.title });
+
+      // Also delete future unpaid instances
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      await Bill.deleteMany({ userId, title: bill.title, isRecurring: true, dueDate: { $gte: today }, status: { $ne: 'paid' } });
     }
 
     return res.status(204).send();

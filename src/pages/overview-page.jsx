@@ -6,7 +6,7 @@ import { api } from '../lib/api';
 import { useOverview } from '../lib/hooks';
 import { usePeriod } from '../state/period-context';
 import { useToast } from '../state/toast-context';
-import { BillsList, DonutProgress, ErrorState, Field, GlassButton, GlassCard, GlassInput, MetricCard, Modal, SectionHeader, Skeleton, TransactionRows } from '../components/ui';
+import { BillsList, DonutProgress, ErrorState, Field, GlassButton, GlassCard, GlassInput, MetricCard, Modal, PeriodSelector, SectionHeader, Skeleton, TransactionRows } from '../components/ui';
 import { DatePickerField } from '../components/date-picker-field';
 import { formatCurrency } from '../lib/format';
 
@@ -109,10 +109,13 @@ export function OverviewPage() {
           <h1 className="page-title">Dashboard overview</h1>
           <p className="mt-2 text-sm text-finance-muted">Live metrics, budgets, pots, transactions, and recurring bills for {periodLabel}.</p>
         </div>
-        <GlassButton className="w-full sm:w-auto" onClick={() => setShowAddBalance(true)}>
-          <PlusCircle size={16} />
-          Add balance
-        </GlassButton>
+        <div className="flex items-center gap-3">
+          <PeriodSelector />
+          <GlassButton className="sm:w-auto" onClick={() => setShowAddBalance(true)}>
+            <PlusCircle size={16} />
+            Add balance
+          </GlassButton>
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">

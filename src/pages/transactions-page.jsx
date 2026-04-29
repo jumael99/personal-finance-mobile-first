@@ -10,6 +10,7 @@ import {
   GlassInput,
   HelperText,
   Modal,
+  PeriodSelector,
   RadioCard,
   SectionHeader,
   SelectField,
@@ -139,10 +140,13 @@ export function TransactionsPage() {
           <h1 className="page-title">Transactions</h1>
           <p className="mt-2 text-sm text-finance-muted">Search, filter, and sort transaction data for {periodLabel}.</p>
         </div>
-        <GlassButton className="w-full sm:w-auto" onClick={() => setShowModal(true)}>
-          <PlusCircle size={16} />
-          Add New Transaction
-        </GlassButton>
+        <div className="flex items-center gap-3">
+          <PeriodSelector />
+          <GlassButton className="sm:w-auto" onClick={() => setShowModal(true)}>
+            <PlusCircle size={16} />
+            Add New Transaction
+          </GlassButton>
+        </div>
       </div>
 
       <GlassCard>

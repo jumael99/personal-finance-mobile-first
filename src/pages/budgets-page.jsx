@@ -13,6 +13,7 @@ import {
   GlassInput,
   HelperText,
   Modal,
+  PeriodSelector,
   SectionHeader,
   SelectField,
   Skeleton,
@@ -163,10 +164,13 @@ export function BudgetsPage() {
           <h1 className="page-title">Budgets</h1>
           <p className="mt-2 text-sm text-finance-muted">Track category maximums against live spending totals for {periodLabel}.</p>
         </div>
-        <GlassButton className="w-full sm:w-auto" onClick={openAddModal}>
-          <PlusCircle size={16} />
-          Add New Budget
-        </GlassButton>
+        <div className="flex items-center gap-3">
+          <PeriodSelector />
+          <GlassButton className="sm:w-auto" onClick={openAddModal}>
+            <PlusCircle size={16} />
+            Add New Budget
+          </GlassButton>
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
