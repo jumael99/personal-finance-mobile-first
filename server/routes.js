@@ -590,6 +590,25 @@ router.put('/bills/:id', async (req, res, next) => {
   }
 });
 
+router.post('/bills/:id/remove-recurring', async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const bill = await Bill.findOne({ _id: req.params.id, userId });
+
+    if (!bill) {
+      return res.status(404).json({ message: 'Bill not found' });
+    }
+
+    await BillTemplate.findOneAndDelete({ userId, title: bill.title });
+    bill.isRecurring = false;
+    await bill.save();
+
+    return res.json(bill);
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.delete('/bills/:id', async (req, res, next) => {
   try {
     const userId = req.user.id;

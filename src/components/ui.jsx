@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Link2Off, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { DeleteAction } from './delete-action';
 import { amountTone, formatCompactDate, formatCurrency, formatShortDate } from '../lib/format';
@@ -225,50 +225,51 @@ function TransactionAvatar({ item, className = '' }) {
   );
 }
 
-export function BillsList({ items, compact = false, onDelete, deletingId }) {
+function PaidIndicator() {
+  return (
+    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-finance-teal text-white" title="Paid">
+      <Check size={12} strokeWidth={3} />
+    </span>
+  );
+}
+
+function ActionButton({ label, icon: Icon, onClick, disabled = false, busy = false, crossedOut = false }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      disabled={disabled}
+      className={`group inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-finance-line bg-finance-paper/85 text-finance-muted transition duration-200 hover:border-finance-charcoal/25 hover:bg-finance-cream hover:text-finance-text disabled:cursor-not-allowed disabled:opacity-60 ${crossedOut ? 'line-through' : ''}`}
+    >
+      <Icon size={17} className={busy ? 'animate-pulse' : 'text-current'} />
+    </button>
+  );
+}
+
+export function BillsList({ items, compact = false, onDelete, deletingId, onPay, payingId, onRemoveRecurring, removingRecurringId }) {
   if (!items.length) {
     return <EmptyState message="No bills found." />;
   }
 
+  const hasActions = !!(onPay || onRemoveRecurring || onDelete);
+
   if (compact) {
     return (
       <div className="space-y-3">
-        {items.map((bill) => (
-          <article key={bill._id} className="flex items-center justify-between rounded-2xl bg-finance-line px-4 py-3">
-            <div>
-              <p className="font-medium text-finance-text">{bill.title}</p>
-              <p className="text-sm text-finance-muted">{formatShortDate(bill.dueDate)}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {onDelete ? (
-                <DeleteAction
-                  label={`Delete bill ${bill.title}`}
-                  onClick={() => {
-                    void onDelete(bill);
-                  }}
-                  disabled={deletingId === bill._id}
-                  busy={deletingId === bill._id}
-                />
-              ) : null}
-              <p className="font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
-            </div>
-          </article>
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="flex gap-3 overflow-x-auto pb-1 md:hidden">
-        {items.map((bill) => (
-          <article key={bill._id} className="glass-card min-w-[250px] p-4">
-            <div className="flex items-start justify-between gap-3">
+        {items.map((bill) => {
+          const isPaid = bill.computedStatus === 'paid' || bill.status === 'paid';
+          return (
+            <article key={bill._id} className="flex items-center justify-between rounded-2xl bg-finance-line px-4 py-3">
               <div>
-                <p className="font-medium text-finance-text">{bill.title}</p>
-                <p className="mt-1 text-sm text-finance-muted">{formatShortDate(bill.dueDate)}</p>
+                <div className="flex items-center gap-2">
+                  {isPaid ? <PaidIndicator /> : null}
+                  <p className="font-medium text-finance-text">{bill.title}</p>
+                </div>
+                <p className="text-sm text-finance-muted">{formatShortDate(bill.dueDate)}</p>
               </div>
-              <div className="flex items-start gap-2">
+              <div className="flex items-center gap-2">
                 {onDelete ? (
                   <DeleteAction
                     label={`Delete bill ${bill.title}`}
@@ -281,31 +282,61 @@ export function BillsList({ items, compact = false, onDelete, deletingId }) {
                 ) : null}
                 <p className="font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
               </div>
-            </div>
-            {bill.isRecurring ? (
-              <span className="mt-3 inline-flex rounded-full bg-finance-peach px-2 py-1 text-xs text-finance-ochre">Recurring</span>
-            ) : null}
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </div>
-      <div className="hidden overflow-hidden rounded-2xl md:block">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-finance-line text-finance-muted">
-            <tr>
-              <th className="px-4 py-3 font-medium">Bill Title</th>
-              <th className="px-4 py-3 font-medium">Due Date</th>
-              <th className="px-4 py-3 text-right font-medium">Amount</th>
-              {onDelete ? <th className="px-4 py-3 text-right font-medium">Delete</th> : null}
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((bill) => (
-              <tr key={bill._id} className="border-t border-finance-line bg-finance-paper">
-                <td className="px-4 py-4 font-medium text-finance-text">{bill.title}</td>
-                <td className="px-4 py-4 text-finance-muted">{formatShortDate(bill.dueDate)}</td>
-                <td className="px-4 py-4 text-right font-medium text-finance-text">{formatCurrency(bill.amount)}</td>
-                {onDelete ? (
-                  <td className="px-4 py-4 text-right">
+    );
+  }
+
+  return (
+    <>
+      <div className="flex gap-3 overflow-x-auto pb-1 md:hidden">
+        {items.map((bill) => {
+          const isPaid = bill.computedStatus === 'paid' || bill.status === 'paid';
+          return (
+            <article key={bill._id} className="glass-card min-w-[250px] p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    {isPaid ? <PaidIndicator /> : null}
+                    <p className="font-medium text-finance-text">{bill.title}</p>
+                  </div>
+                  <p className="mt-1 text-sm text-finance-muted">{formatShortDate(bill.dueDate)}</p>
+                </div>
+                <p className="font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-1">
+                {bill.isRecurring ? (
+                  <span className="inline-flex rounded-full bg-finance-peach px-2 py-1 text-xs text-finance-ochre">Recurring</span>
+                ) : null}
+              </div>
+              {hasActions ? (
+                <div className="mt-3 flex items-center gap-1 border-t border-finance-line pt-3">
+                  {onPay ? (
+                    <ActionButton
+                      label={isPaid ? `Already paid` : `Pay ${bill.title}`}
+                      icon={Check}
+                      onClick={() => {
+                        void onPay(bill);
+                      }}
+                      disabled={isPaid || payingId === bill._id}
+                      busy={payingId === bill._id}
+                      crossedOut={isPaid}
+                    />
+                  ) : null}
+                  {onRemoveRecurring && bill.isRecurring ? (
+                    <ActionButton
+                      label={`Remove recurring for ${bill.title}`}
+                      icon={Link2Off}
+                      onClick={() => {
+                        void onRemoveRecurring(bill);
+                      }}
+                      disabled={removingRecurringId === bill._id}
+                      busy={removingRecurringId === bill._id}
+                    />
+                  ) : null}
+                  {onDelete ? (
                     <DeleteAction
                       label={`Delete bill ${bill.title}`}
                       onClick={() => {
@@ -314,10 +345,81 @@ export function BillsList({ items, compact = false, onDelete, deletingId }) {
                       disabled={deletingId === bill._id}
                       busy={deletingId === bill._id}
                     />
+                  ) : null}
+                </div>
+              ) : null}
+            </article>
+          );
+        })}
+      </div>
+      <div className="hidden overflow-hidden rounded-2xl md:block">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-finance-line text-finance-muted">
+            <tr>
+              <th className="px-4 py-3 font-medium">Bill Title</th>
+              <th className="px-4 py-3 font-medium">Due Date</th>
+              <th className="px-4 py-3 text-right font-medium">Amount</th>
+              {hasActions ? <th className="px-4 py-3 text-right font-medium">Actions</th> : null}
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((bill) => {
+              const isPaid = bill.computedStatus === 'paid' || bill.status === 'paid';
+              return (
+                <tr key={bill._id} className="border-t border-finance-line bg-finance-paper">
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-2">
+                      {isPaid ? <PaidIndicator /> : null}
+                      <span className="font-medium text-finance-text">{bill.title}</span>
+                      {bill.isRecurring ? (
+                        <span className="inline-flex rounded-full bg-finance-peach px-2 py-1 text-xs text-finance-ochre">Recurring</span>
+                      ) : null}
+                    </div>
                   </td>
-                ) : null}
-              </tr>
-            ))}
+                  <td className="px-4 py-4 text-finance-muted">{formatShortDate(bill.dueDate)}</td>
+                  <td className="px-4 py-4 text-right font-medium text-finance-text">{formatCurrency(bill.amount)}</td>
+                  {hasActions ? (
+                    <td className="px-4 py-4 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {onPay ? (
+                          <ActionButton
+                            label={isPaid ? `Already paid` : `Pay ${bill.title}`}
+                            icon={Check}
+                            onClick={() => {
+                              void onPay(bill);
+                            }}
+                            disabled={isPaid || payingId === bill._id}
+                            busy={payingId === bill._id}
+                            crossedOut={isPaid}
+                          />
+                        ) : null}
+                        {onRemoveRecurring && bill.isRecurring ? (
+                          <ActionButton
+                            label={`Remove recurring for ${bill.title}`}
+                            icon={Link2Off}
+                            onClick={() => {
+                              void onRemoveRecurring(bill);
+                            }}
+                            disabled={removingRecurringId === bill._id}
+                            busy={removingRecurringId === bill._id}
+                          />
+                        ) : null}
+                        {onDelete ? (
+                          <DeleteAction
+                            label={`Delete bill ${bill.title}`}
+                            onClick={() => {
+                              void onDelete(bill);
+                            }}
+                            disabled={deletingId === bill._id}
+                            busy={deletingId === bill._id}
+                          />
+                        ) : null}
+                      </div>
+                    </td>
+                  ) : null}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

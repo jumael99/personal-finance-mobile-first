@@ -6,7 +6,7 @@ import { formatCurrency, formatShortDate } from '../lib/format';
 import { useBills } from '../lib/hooks';
 import { usePeriod } from '../state/period-context';
 import { useToast } from '../state/toast-context';
-import { BillsList, ErrorState, Field, GlassButton, GlassCard, GlassInput, GlassSelect, Modal, PeriodSelector, SectionHeader, Skeleton } from '../components/ui';
+import { BillsList, ErrorState, Field, GlassButton, GlassCard, GlassInput, GlassSelect, Modal, SectionHeader, Skeleton } from '../components/ui';
 import { DatePickerField } from '../components/date-picker-field';
 
 export function BillsPage() {
@@ -55,6 +55,21 @@ export function BillsPage() {
       }),
   });
 
+  const payBill = useMutation({
+    mutationFn: (bill) =>
+      api(`/bills/${bill._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status: 'paid' }),
+      }),
+  });
+
+  const removeRecurring = useMutation({
+    mutationFn: (bill) =>
+      api(`/bills/${bill._id}/remove-recurring`, {
+        method: 'POST',
+      }),
+  });
+
   const summary = useMemo(() => {
     const items = bills.data || [];
     return {
@@ -91,6 +106,40 @@ export function BillsPage() {
     );
   };
 
+  const handlePayBill = async (bill) => {
+    await toastPromise(
+      async () => {
+        const result = await payBill.mutateAsync(bill);
+        queryClient.invalidateQueries({ queryKey: ['bills'] });
+        queryClient.invalidateQueries({ queryKey: ['overview'] });
+        return result;
+      },
+      {
+        loading: `Paying ${bill.title}...`,
+        success: 'Bill paid',
+        successDescription: `${bill.title} marked as paid.`,
+        error: 'Could not pay bill',
+      },
+    );
+  };
+
+  const handleRemoveRecurring = async (bill) => {
+    await toastPromise(
+      async () => {
+        const result = await removeRecurring.mutateAsync(bill);
+        queryClient.invalidateQueries({ queryKey: ['bills'] });
+        queryClient.invalidateQueries({ queryKey: ['overview'] });
+        return result;
+      },
+      {
+        loading: `Removing recurring for ${bill.title}...`,
+        success: 'Recurring removed',
+        successDescription: `${bill.title} is no longer recurring.`,
+        error: 'Could not remove recurring',
+      },
+    );
+  };
+
   return (
     <div className="space-y-4 lg:space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -99,7 +148,6 @@ export function BillsPage() {
           <p className="mt-2 text-sm text-finance-muted">Monitor bills, payment status, and due dates for {periodLabel}.</p>
         </div>
         <div className="flex items-center gap-3">
-          <PeriodSelector />
           <GlassButton className="sm:w-auto" onClick={() => setShowModal(true)}>
             <PlusCircle size={16} />
             Add new Recurring Bill
@@ -142,7 +190,15 @@ export function BillsPage() {
         {bills.isLoading ? (
           <Skeleton className="h-80" />
         ) : (
-          <BillsList items={bills.data} onDelete={handleDeleteBill} deletingId={deleteBill.isPending ? deleteBill.variables : null} />
+          <BillsList
+            items={bills.data}
+            onPay={handlePayBill}
+            payingId={payBill.isPending ? payBill.variables?._id : null}
+            onRemoveRecurring={handleRemoveRecurring}
+            removingRecurringId={removeRecurring.isPending ? removeRecurring.variables?._id : null}
+            onDelete={handleDeleteBill}
+            deletingId={deleteBill.isPending ? deleteBill.variables : null}
+          />
         )}
       </GlassCard>
 
