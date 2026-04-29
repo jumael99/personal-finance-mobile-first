@@ -22,8 +22,8 @@ export function DatePickerField({ value, onChange, required = false }) {
         setOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
   }, [open]);
 
   // Close on Escape
@@ -58,16 +58,19 @@ export function DatePickerField({ value, onChange, required = false }) {
       {required && <input type="text" required value={value} readOnly className="sr-only" tabIndex={-1} />}
 
       {open && (
-        <div ref={popoverRef} className="calendar-popover">
-          <div className="calendar-card">
-            <DayPicker
-              mode="single"
-              selected={selected}
-              onSelect={handleSelect}
-              defaultMonth={selected || new Date()}
-            />
+        <>
+          <div ref={popoverRef} className="calendar-popover">
+            <div className="calendar-card">
+              <DayPicker
+                mode="single"
+                selected={selected}
+                onSelect={handleSelect}
+                defaultMonth={selected || new Date()}
+              />
+            </div>
           </div>
-        </div>
+          <div aria-hidden="true" className="h-[22rem]" />
+        </>
       )}
     </div>
   );
