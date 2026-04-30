@@ -72,11 +72,11 @@
   }
 
   .page-title {
-    @apply font-display text-[24px] font-bold tracking-[-0.03em] text-finance-text sm:text-[28px] lg:text-[32px];
+    @apply font-display text-[22px] font-bold tracking-[-0.03em] text-finance-text sm:text-[26px] lg:text-[32px];
   }
 
   .section-title {
-    @apply font-display text-xl font-bold tracking-[-0.03em] text-finance-text;
+    @apply font-display text-lg font-bold tracking-[-0.03em] text-finance-text sm:text-xl;
   }
 }
 

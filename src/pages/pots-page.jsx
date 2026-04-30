@@ -202,11 +202,11 @@ export function PotsPage() {
                     <div className="flex items-center gap-1">
                       <GlassButton
                         type="button"
-                        className="border-finance-line bg-finance-paper px-3 py-2 text-finance-text"
+                        className="border-finance-line bg-finance-paper px-2.5 sm:px-3 py-2 text-finance-text text-xs sm:text-sm"
                         onClick={() => openEditModal(pot)}
                       >
-                        <PenSquare size={15} />
-                        Edit
+                        <PenSquare size={14} className="sm:size-[15px]" />
+                        <span className="hidden sm:inline">Edit</span>
                       </GlassButton>
                       <DeleteAction
                         label={`Delete pot ${pot.name}`}
@@ -220,7 +220,7 @@ export function PotsPage() {
                   }
                 />
                 <div className="space-y-3">
-                  <p className="font-display text-3xl font-bold tracking-[-0.04em]">{formatCurrency(pot.saved)}</p>
+                  <p className="font-display text-2xl sm:text-3xl font-bold tracking-[-0.04em]">{formatCurrency(pot.saved)}</p>
                   <p className="text-sm text-finance-muted">Progress: {Math.round(progress)}%</p>
                   <ProgressBar value={progress} />
                   <div className="grid gap-3 sm:grid-cols-2">

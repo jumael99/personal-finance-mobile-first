@@ -113,7 +113,7 @@ export function OverviewPage() {
           <PeriodSelector />
           <GlassButton className="sm:w-auto" onClick={() => setShowAddBalance(true)}>
             <PlusCircle size={16} />
-            Add balance
+            Add Money
           </GlassButton>
         </div>
       </div>
@@ -134,7 +134,7 @@ export function OverviewPage() {
         )}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         <GlassCard>
           <SectionHeader title="Pot Savings" icon={PiggyBank} subtitle={isLoading ? 'Loading savings...' : `Total Saved: ${formatCurrency(data.potSavings.totalSaved)}`} />
           {isLoading ? (
@@ -146,12 +146,13 @@ export function OverviewPage() {
           ) : (
             <div className="space-y-3">
               {data.potSavings.topPots.map((pot) => (
-                <div key={pot._id} className="rounded-2xl bg-finance-line px-4 py-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-medium text-finance-text">{pot.name}</p>
-                    <p className="text-sm text-finance-muted">{formatCurrency(pot.saved)}</p>
+                <article key={pot._id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl bg-finance-line px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-finance-text">{pot.name}</p>
+                    <p className="mt-1 text-sm text-finance-muted">Target: {formatCurrency(pot.target)}</p>
                   </div>
-                </div>
+                  <p className="min-w-[7.5rem] text-right font-medium text-finance-text">{formatCurrency(pot.saved)}</p>
+                </article>
               ))}
             </div>
           )}
@@ -159,34 +160,11 @@ export function OverviewPage() {
 
         <GlassCard>
           <SectionHeader title="Budgets" icon={Landmark} subtitle={isLoading ? 'Chart is loading...' : 'Overall spending vs total budget maximums'} />
-          {isLoading ? <Skeleton className="h-36" /> : <DonutProgress spent={totalBudgetSpent} maximum={totalBudgetMax} />}
-        </GlassCard>
-
-        <GlassCard>
-          <SectionHeader
-            title="Bills"
-            icon={ReceiptText}
-            subtitle={isLoading ? 'Loading bills...' : `${periodLabel}: ${formatCurrency(data.bills.totalUpcomingThisMonth)}`}
-            action={
-              <Link to="/bills">
-                <GlassButton className="px-3 py-2">See all Bills</GlassButton>
-              </Link>
-            }
-          />
-          {isLoading ? (
-            <Skeleton className="h-36" />
-          ) : (
-            <BillsList
-              items={data.bills.upcoming}
-              compact
-              onDelete={handleDeleteBill}
-              deletingId={deleteBill.isPending ? deleteBill.variables : null}
-            />
-          )}
+          {isLoading ? <Skeleton className="h-64" /> : <DonutProgress spent={totalBudgetSpent} maximum={totalBudgetMax} />}
         </GlassCard>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.7fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-2">
         <GlassCard>
           <SectionHeader title="Transactions overview" icon={ArrowDownCircle} subtitle={isLoading ? 'transactions are rendering...' : '5 most recent transactions'} />
           {isLoading ? (
@@ -202,7 +180,16 @@ export function OverviewPage() {
         </GlassCard>
 
         <GlassCard>
-          <SectionHeader title="Upcoming Bills" icon={ReceiptText} subtitle={`Next 3 due bills in ${periodLabel}`} />
+          <SectionHeader
+            title="Bills"
+            icon={ReceiptText}
+            subtitle={isLoading ? 'Loading bills...' : `${periodLabel}: ${formatCurrency(data.bills.totalUpcomingThisMonth)}`}
+            action={
+              <Link to="/bills">
+                <GlassButton className="px-3 py-2">See all</GlassButton>
+              </Link>
+            }
+          />
           {isLoading ? (
             <Skeleton className="h-64" />
           ) : (
@@ -216,7 +203,7 @@ export function OverviewPage() {
         </GlassCard>
       </div>
 
-      <Modal open={showAddBalance} title="Add balance" onClose={() => setShowAddBalance(false)}>
+      <Modal open={showAddBalance} title="Add Transaction" onClose={() => setShowAddBalance(false)}>
         <form
           className="space-y-4"
           onSubmit={(event) => {
@@ -254,7 +241,7 @@ export function OverviewPage() {
             />
           </Field>
           <GlassButton type="submit" className="w-full" disabled={addBalance.isPending}>
-            {addBalance.isPending ? 'Saving...' : 'Add balance'}
+            {addBalance.isPending ? 'Saving...' : 'Add Transaction'}
           </GlassButton>
         </form>
       </Modal>

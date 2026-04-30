@@ -8,9 +8,9 @@ export function DeleteAction({ label, onClick, disabled = false, busy = false })
       title={label}
       onClick={onClick}
       disabled={disabled}
-      className="group inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-finance-line bg-finance-paper/85 text-[#97959f] transition duration-200 hover:border-finance-red/25 hover:bg-finance-red/10 hover:text-finance-red disabled:cursor-not-allowed disabled:opacity-60"
+      className="group inline-flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl sm:rounded-2xl border border-finance-line bg-finance-paper/85 text-[#97959f] transition duration-200 hover:border-finance-red/25 hover:bg-finance-red/10 hover:text-finance-red disabled:cursor-not-allowed disabled:opacity-60"
     >
-      <Trash2 size={17} className={busy ? 'animate-pulse text-finance-red' : 'text-current'} />
+      <Trash2 size={15} className={busy ? 'animate-pulse text-finance-red' : 'text-current'} />
     </button>
   );
 }

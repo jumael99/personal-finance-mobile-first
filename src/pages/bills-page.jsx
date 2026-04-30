@@ -286,7 +286,7 @@ function SummaryCard({ title, amount, detail, dark = false, tone = 'default' }) 
       }`}
     >
       <p className={`text-sm ${dark ? 'text-finance-paper/70' : 'text-finance-muted'}`}>{title}</p>
-      <p className={`mt-3 font-display text-2xl font-bold tracking-[-0.04em] ${dark ? 'text-finance-paper' : toneClass}`}>{amount}</p>
+      <p className={`mt-3 font-display text-xl sm:text-2xl font-bold tracking-[-0.04em] ${dark ? 'text-finance-paper' : toneClass}`}>{amount}</p>
       <p className={`mt-2 text-sm ${dark ? 'text-finance-paper/70' : 'text-finance-muted'}`}>{detail}</p>
     </section>
   );

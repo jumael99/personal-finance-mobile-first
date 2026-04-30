@@ -215,7 +215,7 @@ export function BudgetsPage() {
 
                 return (
                   <article key={budget._id} className="rounded-2xl border border-finance-line bg-finance-paper p-4">
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className={`h-3 w-3 rounded-full ${theme.dotClassName}`} />
@@ -223,26 +223,31 @@ export function BudgetsPage() {
                         </div>
                         <p className="mt-1 text-sm text-finance-muted">Maximum: {formatCurrency(budget.maximum)}</p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <p className={`text-sm font-medium ${budget.remaining < 0 ? 'text-finance-red' : 'text-finance-text'}`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className={`text-sm font-medium sm:hidden ${budget.remaining < 0 ? 'text-finance-red' : 'text-finance-text'}`}>
                           Remaining: {formatCurrency(budget.remaining)}
                         </p>
-                        <GlassButton
-                          type="button"
-                          className="border-finance-line bg-finance-paper px-3 py-2 text-finance-text"
-                          onClick={() => openEditModal(budget)}
-                        >
-                          <PenSquare size={15} />
-                          Edit
-                        </GlassButton>
-                        <DeleteAction
-                          label={`Delete budget for ${budget.category}`}
-                          onClick={() => {
-                            void handleDeleteBudget(budget);
-                          }}
-                          disabled={deleteBudget.isPending && deleteBudget.variables === budget._id}
-                          busy={deleteBudget.isPending && deleteBudget.variables === budget._id}
-                        />
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          <p className={`hidden text-sm font-medium sm:block ${budget.remaining < 0 ? 'text-finance-red' : 'text-finance-text'}`}>
+                            Remaining: {formatCurrency(budget.remaining)}
+                          </p>
+                          <GlassButton
+                            type="button"
+                            className="border-finance-line bg-finance-paper px-2.5 sm:px-3 py-2 text-finance-text text-xs sm:text-sm"
+                            onClick={() => openEditModal(budget)}
+                          >
+                            <PenSquare size={14} className="sm:size-[15px]" />
+                            <span className="hidden sm:inline">Edit</span>
+                          </GlassButton>
+                          <DeleteAction
+                            label={`Delete budget for ${budget.category}`}
+                            onClick={() => {
+                              void handleDeleteBudget(budget);
+                            }}
+                            disabled={deleteBudget.isPending && deleteBudget.variables === budget._id}
+                            busy={deleteBudget.isPending && deleteBudget.variables === budget._id}
+                          />
+                        </div>
                       </div>
                     </div>
                     <div className="mt-4 space-y-2 text-sm text-finance-muted">

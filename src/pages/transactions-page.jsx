@@ -12,6 +12,7 @@ import {
   Modal,
   PeriodSelector,
   RadioCard,
+  SearchableSelect,
   SectionHeader,
   SelectField,
   Skeleton,
@@ -266,20 +267,13 @@ export function TransactionsPage() {
 
           <div className="space-y-3">
             <Field label="Category">
-              <SelectField
+              <SearchableSelect
+                options={categoryOptions}
                 value={form.category}
-                onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
+                onChange={(newValue) => setForm((current) => ({ ...current, category: newValue }))}
+                placeholder="Search or select a category..."
                 required
-              >
-                <option value="" disabled>
-                  Select A Budget Category
-                </option>
-                {categoryOptions.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </SelectField>
+              />
             </Field>
 
             <div className="space-y-3 rounded-2xl border border-dashed border-finance-line p-3">

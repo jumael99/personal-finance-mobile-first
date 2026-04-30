@@ -1,26 +1,27 @@
-import { Check, ChevronDown, ChevronLeft, ChevronRight, Link2Off, X } from 'lucide-react';
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Link2Off, Search, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { useEffect, useRef, useState } from 'react';
 import { DeleteAction } from './delete-action';
 import { amountTone, formatCompactDate, formatCurrency, formatShortDate } from '../lib/format';
 import { usePeriod } from '../state/period-context';
 
 export function GlassCard({ className = '', children }) {
-  return <section className={`glass-card p-5 ${className}`}>{children}</section>;
+  return <section className={`glass-card p-4 sm:p-5 ${className}`}>{children}</section>;
 }
 
 export function SectionHeader({ title, action, subtitle, icon: Icon }) {
   return (
-    <div className="mb-4 flex items-start justify-between gap-3">
+    <div className="mb-3 sm:mb-4 flex items-start justify-between gap-3">
       <div>
         <div className="flex items-center gap-2">
           {Icon ? (
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-finance-cream text-finance-charcoal">
-              <Icon size={18} />
+            <span className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-lg sm:rounded-xl bg-finance-cream text-finance-charcoal">
+              <Icon size={16} className="sm:size-[18px]" />
             </span>
           ) : null}
           <h2 className="section-title">{title}</h2>
         </div>
-        {subtitle ? <p className="mt-1 text-sm text-finance-muted">{subtitle}</p> : null}
+        {subtitle ? <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-finance-muted">{subtitle}</p> : null}
       </div>
       {action}
     </div>
@@ -31,14 +32,14 @@ export function MetricCard({ label, value, icon: Icon }) {
   return (
     <GlassCard className="p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-finance-muted">{label}</p>
+        <p className="text-xs sm:text-sm text-finance-muted">{label}</p>
         {Icon ? (
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-finance-cream text-finance-charcoal">
-            <Icon size={18} />
+          <span className="grid h-8 w-8 sm:h-10 sm:w-10 place-items-center rounded-xl sm:rounded-2xl bg-finance-cream text-finance-charcoal">
+            <Icon size={16} className="sm:size-[18px]" />
           </span>
         ) : null}
       </div>
-      <p className="mt-3 font-display text-[28px] font-bold tracking-[-0.04em] text-finance-text sm:text-[32px]">{formatCurrency(value)}</p>
+      <p className="mt-2 sm:mt-3 font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold tracking-[-0.04em] text-finance-text">{formatCurrency(value)}</p>
     </GlassCard>
   );
 }
@@ -95,33 +96,33 @@ export function TransactionRows({ items, compact = false, onDelete, deletingId }
 
   if (compact) {
     return (
-      <div className="flex gap-3 overflow-x-auto pb-1 lg:block lg:overflow-visible">
+      <div className="space-y-3">
         {items.map((item) => (
-          <article key={item._id} className="glass-card min-w-[270px] p-4 lg:mb-3 lg:min-w-0">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 items-start gap-3">
+          <article key={item._id} className="rounded-2xl bg-finance-line px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <TransactionAvatar item={item} />
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-finance-text">{item.senderRecipient}</p>
-                  <p className="mt-1 inline-flex rounded-full bg-finance-line px-2 py-1 text-xs text-finance-muted">{item.category}</p>
+                  <p className="truncate text-sm font-medium text-finance-text">{item.senderRecipient}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2">
-                {onDelete ? (
-                  <DeleteAction
-                    label={`Delete transaction for ${item.senderRecipient}`}
-                    onClick={() => {
-                      void onDelete(item);
-                    }}
-                    disabled={deletingId === item._id}
-                    busy={deletingId === item._id}
-                  />
-                ) : null}
-                <div className="text-right">
-                  <p className="text-xs text-finance-muted">{formatCompactDate(item.date)}</p>
-                  <p className={`mt-2 font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</p>
-                </div>
+              <p className={`shrink-0 text-sm font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</p>
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex rounded-full bg-finance-paper/80 px-2 py-1 text-xs text-finance-muted">{item.category}</span>
+                <span className="text-xs text-finance-muted">{formatCompactDate(item.date)}</span>
               </div>
+              {onDelete ? (
+                <DeleteAction
+                  label={`Delete transaction for ${item.senderRecipient}`}
+                  onClick={() => {
+                    void onDelete(item);
+                  }}
+                  disabled={deletingId === item._id}
+                  busy={deletingId === item._id}
+                />
+              ) : null}
             </div>
           </article>
         ))}
@@ -133,31 +134,31 @@ export function TransactionRows({ items, compact = false, onDelete, deletingId }
     <>
       <div className="grid gap-3 md:hidden">
         {items.map((item) => (
-          <article key={item._id} className="glass-card p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 items-start gap-3">
+          <article key={item._id} className="rounded-2xl bg-finance-line px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <TransactionAvatar item={item} />
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-finance-text">{item.senderRecipient}</p>
-                  <p className="mt-1 inline-flex rounded-full bg-finance-line px-2 py-1 text-xs text-finance-muted">{item.category}</p>
+                  <p className="truncate text-sm font-medium text-finance-text">{item.senderRecipient}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2">
-                {onDelete ? (
-                  <DeleteAction
-                    label={`Delete transaction for ${item.senderRecipient}`}
-                    onClick={() => {
-                      void onDelete(item);
-                    }}
-                    disabled={deletingId === item._id}
-                    busy={deletingId === item._id}
-                  />
-                ) : null}
-                <div className="text-right">
-                  <p className="text-xs text-finance-muted">{formatShortDate(item.date)}</p>
-                  <p className={`mt-2 font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</p>
-                </div>
+              <p className={`shrink-0 text-sm font-medium ${amountTone(item.amount)}`}>{formatCurrency(item.amount)}</p>
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex rounded-full bg-finance-paper/80 px-2 py-1 text-xs text-finance-muted">{item.category}</span>
+                <span className="text-xs text-finance-muted">{formatShortDate(item.date)}</span>
               </div>
+              {onDelete ? (
+                <DeleteAction
+                  label={`Delete transaction for ${item.senderRecipient}`}
+                  onClick={() => {
+                    void onDelete(item);
+                  }}
+                  disabled={deletingId === item._id}
+                  busy={deletingId === item._id}
+                />
+              ) : null}
             </div>
           </article>
         ))}
@@ -215,11 +216,11 @@ function TransactionAvatar({ item, className = '' }) {
     .join('');
 
   if (item.avatar) {
-    return <img src={item.avatar} alt="" className={`h-12 w-12 shrink-0 rounded-2xl object-cover ${className}`} />;
+    return <img src={item.avatar} alt="" className={`h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-xl sm:rounded-2xl object-cover ${className}`} />;
   }
 
   return (
-    <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-finance-line text-sm font-medium text-finance-text ${className}`}>
+    <span className={`grid h-10 w-10 sm:h-12 sm:w-12 shrink-0 place-items-center rounded-xl sm:rounded-2xl bg-finance-line text-xs sm:text-sm font-medium text-finance-text ${className}`}>
       {initials || '?'}
     </span>
   );
@@ -241,9 +242,9 @@ function ActionButton({ label, icon: Icon, onClick, disabled = false, busy = fal
       title={label}
       onClick={onClick}
       disabled={disabled}
-      className={`group inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-finance-line bg-finance-paper/85 text-finance-muted transition duration-200 hover:border-finance-charcoal/25 hover:bg-finance-cream hover:text-finance-text disabled:cursor-not-allowed disabled:opacity-60 ${crossedOut ? 'line-through' : ''}`}
+      className={`group inline-flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl sm:rounded-2xl border border-finance-line bg-finance-paper/85 text-finance-muted transition duration-200 hover:border-finance-charcoal/25 hover:bg-finance-cream hover:text-finance-text disabled:cursor-not-allowed disabled:opacity-60 ${crossedOut ? 'line-through' : ''}`}
     >
-      <Icon size={17} className={busy ? 'animate-pulse' : 'text-current'} />
+      <Icon size={15} className={busy ? 'animate-pulse' : 'text-current'} />
     </button>
   );
 }
@@ -261,15 +262,16 @@ export function BillsList({ items, compact = false, onDelete, deletingId, onPay,
         {items.map((bill) => {
           const isPaid = bill.computedStatus === 'paid' || bill.status === 'paid';
           return (
-            <article key={bill._id} className="flex items-center justify-between rounded-2xl bg-finance-line px-4 py-3">
-              <div>
-                <div className="flex items-center gap-2">
+            <article key={bill._id} className="rounded-2xl bg-finance-line px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2">
                   {isPaid ? <PaidIndicator /> : null}
-                  <p className="font-medium text-finance-text">{bill.title}</p>
+                  <p className="truncate text-sm font-medium text-finance-text">{bill.title}</p>
                 </div>
-                <p className="text-sm text-finance-muted">{formatShortDate(bill.dueDate)}</p>
+                <p className="shrink-0 text-sm font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <span className="text-xs text-finance-muted">{formatShortDate(bill.dueDate)}</span>
                 {onDelete ? (
                   <DeleteAction
                     label={`Delete bill ${bill.title}`}
@@ -280,7 +282,6 @@ export function BillsList({ items, compact = false, onDelete, deletingId, onPay,
                     busy={deletingId === bill._id}
                   />
                 ) : null}
-                <p className="font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
               </div>
             </article>
           );
@@ -291,63 +292,61 @@ export function BillsList({ items, compact = false, onDelete, deletingId, onPay,
 
   return (
     <>
-      <div className="flex gap-3 overflow-x-auto pb-1 md:hidden">
+      <div className="grid gap-3 md:hidden">
         {items.map((bill) => {
           const isPaid = bill.computedStatus === 'paid' || bill.status === 'paid';
           return (
-            <article key={bill._id} className="glass-card min-w-[250px] p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    {isPaid ? <PaidIndicator /> : null}
-                    <p className="font-medium text-finance-text">{bill.title}</p>
-                  </div>
-                  <p className="mt-1 text-sm text-finance-muted">{formatShortDate(bill.dueDate)}</p>
+            <article key={bill._id} className="rounded-2xl bg-finance-line px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  {isPaid ? <PaidIndicator /> : null}
+                  <p className="truncate text-sm font-medium text-finance-text">{bill.title}</p>
+                  {bill.isRecurring ? (
+                    <span className="shrink-0 inline-flex rounded-full bg-finance-peach px-2 py-1 text-xs text-finance-ochre">Recurring</span>
+                  ) : null}
                 </div>
-                <p className="font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
+                <p className="shrink-0 text-sm font-medium text-finance-text">{formatCurrency(bill.amount)}</p>
               </div>
-              <div className="mt-3 flex flex-wrap items-center gap-1">
-                {bill.isRecurring ? (
-                  <span className="inline-flex rounded-full bg-finance-peach px-2 py-1 text-xs text-finance-ochre">Recurring</span>
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <span className="text-xs text-finance-muted">{formatShortDate(bill.dueDate)}</span>
+                {hasActions ? (
+                  <div className="flex items-center gap-1">
+                    {onPay ? (
+                      <ActionButton
+                        label={isPaid ? `Already paid` : `Pay ${bill.title}`}
+                        icon={Check}
+                        onClick={() => {
+                          void onPay(bill);
+                        }}
+                        disabled={isPaid || payingId === bill._id}
+                        busy={payingId === bill._id}
+                        crossedOut={isPaid}
+                      />
+                    ) : null}
+                    {onRemoveRecurring && bill.isRecurring ? (
+                      <ActionButton
+                        label={`Remove recurring for ${bill.title}`}
+                        icon={Link2Off}
+                        onClick={() => {
+                          void onRemoveRecurring(bill);
+                        }}
+                        disabled={removingRecurringId === bill._id}
+                        busy={removingRecurringId === bill._id}
+                      />
+                    ) : null}
+                    {onDelete ? (
+                      <DeleteAction
+                        label={`Delete bill ${bill.title}`}
+                        onClick={() => {
+                          void onDelete(bill);
+                        }}
+                        disabled={deletingId === bill._id}
+                        busy={deletingId === bill._id}
+                      />
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
-              {hasActions ? (
-                <div className="mt-3 flex items-center gap-1 border-t border-finance-line pt-3">
-                  {onPay ? (
-                    <ActionButton
-                      label={isPaid ? `Already paid` : `Pay ${bill.title}`}
-                      icon={Check}
-                      onClick={() => {
-                        void onPay(bill);
-                      }}
-                      disabled={isPaid || payingId === bill._id}
-                      busy={payingId === bill._id}
-                      crossedOut={isPaid}
-                    />
-                  ) : null}
-                  {onRemoveRecurring && bill.isRecurring ? (
-                    <ActionButton
-                      label={`Remove recurring for ${bill.title}`}
-                      icon={Link2Off}
-                      onClick={() => {
-                        void onRemoveRecurring(bill);
-                      }}
-                      disabled={removingRecurringId === bill._id}
-                      busy={removingRecurringId === bill._id}
-                    />
-                  ) : null}
-                  {onDelete ? (
-                    <DeleteAction
-                      label={`Delete bill ${bill.title}`}
-                      onClick={() => {
-                        void onDelete(bill);
-                      }}
-                      disabled={deletingId === bill._id}
-                      busy={deletingId === bill._id}
-                    />
-                  ) : null}
-                </div>
-              ) : null}
             </article>
           );
         })}
@@ -429,19 +428,19 @@ export function BillsList({ items, compact = false, onDelete, deletingId, onPay,
 
 export function Field({ label, children }) {
   return (
-    <label className="block space-y-2">
-      <span className="text-sm text-finance-muted">{label}</span>
+    <label className="block space-y-1.5 sm:space-y-2">
+      <span className="text-xs sm:text-sm text-finance-muted">{label}</span>
       {children}
     </label>
   );
 }
 
 export function GlassInput(props) {
-  return <input {...props} className={`glass touch-target w-full rounded-2xl px-4 py-3 text-finance-text outline-none placeholder:text-finance-muted ${props.className || ''}`} />;
+  return <input {...props} className={`glass touch-target w-full rounded-xl sm:rounded-2xl px-4 py-2.5 sm:py-3 text-sm text-finance-text outline-none placeholder:text-finance-muted ${props.className || ''}`} />;
 }
 
 export function GlassSelect(props) {
-  return <select {...props} className={`glass touch-target w-full rounded-2xl px-4 py-3 text-finance-text outline-none ${props.className || ''}`} />;
+  return <select {...props} className={`glass touch-target w-full rounded-xl sm:rounded-2xl px-4 py-2.5 sm:py-3 text-sm text-finance-text outline-none ${props.className || ''}`} />;
 }
 
 export function SelectField({ icon: Icon = ChevronDown, className = '', ...props }) {
@@ -455,6 +454,89 @@ export function SelectField({ icon: Icon = ChevronDown, className = '', ...props
   );
 }
 
+export function SearchableSelect({ options, value, onChange, placeholder = 'Search...', required = false }) {
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  const filtered = query.trim()
+    ? options.filter((opt) => opt.toLowerCase().includes(query.toLowerCase()))
+    : options;
+
+  const selectedLabel = value || '';
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setOpen(false);
+        setQuery('');
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div
+        className={`glass touch-target flex min-h-11 cursor-pointer items-center gap-2.5 sm:gap-3 rounded-xl sm:rounded-2xl px-4 py-2.5 sm:py-3 text-sm text-finance-text outline-none ${open ? 'ring-1 ring-finance-charcoal' : ''}`}
+        onClick={() => {
+          setOpen(true);
+          setQuery('');
+        }}
+      >
+        <Search size={15} className="shrink-0 text-finance-muted" />
+        {open ? (
+          <input
+            autoFocus
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={placeholder}
+            className="w-full bg-transparent text-sm text-finance-text outline-none placeholder:text-finance-muted"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setOpen(false);
+                setQuery('');
+              }
+            }}
+          />
+        ) : (
+          <span className={selectedLabel ? 'flex-1 text-finance-text' : 'flex-1 text-finance-muted'}>
+            {selectedLabel || placeholder}
+          </span>
+        )}
+        <ChevronDown size={15} className={`shrink-0 text-finance-muted transition-transform ${open ? 'rotate-180' : ''}`} />
+      </div>
+      {open ? (
+        <div className="absolute left-0 right-0 z-20 mt-1.5 sm:mt-2 max-h-52 overflow-y-auto rounded-xl sm:rounded-2xl border border-finance-line bg-finance-paper py-1.5 sm:py-2 shadow-lg">
+          {filtered.length === 0 ? (
+            <p className="px-4 py-3 text-sm text-finance-muted">No matching options.</p>
+          ) : (
+            filtered.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                className={`w-full px-4 py-3 text-left text-sm transition-colors hover:bg-finance-cream ${
+                  opt === value ? 'bg-finance-cream font-medium text-finance-text' : 'text-finance-text'
+                }`}
+                onClick={() => {
+                  onChange(opt);
+                  setOpen(false);
+                  setQuery('');
+                }}
+              >
+                {opt}
+              </button>
+            ))
+          )}
+        </div>
+      ) : null}
+      {required ? <input type="text" required value={value} readOnly className="sr-only" tabIndex={-1} /> : null}
+    </div>
+  );
+}
+
 export function HelperText({ children }) {
   return <p className="text-xs text-finance-muted">{children}</p>;
 }
@@ -462,18 +544,18 @@ export function HelperText({ children }) {
 export function RadioCard({ checked, label, description, ...props }) {
   return (
     <label
-      className={`block cursor-pointer rounded-2xl border px-4 py-3 transition ${
+      className={`block cursor-pointer rounded-xl sm:rounded-2xl border px-3.5 sm:px-4 py-3 transition ${
         checked ? 'border-finance-charcoal bg-finance-paper text-finance-text' : 'border-finance-line bg-finance-paper/70 text-finance-muted'
       }`}
     >
       <input type="radio" className="sr-only" checked={checked} {...props} />
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-2 sm:gap-3">
         <div>
-          <p className="font-medium">{label}</p>
-          {description ? <p className="mt-1 text-xs">{description}</p> : null}
+          <p className="text-sm sm:text-base font-medium">{label}</p>
+          {description ? <p className="mt-0.5 sm:mt-1 text-xs text-finance-muted">{description}</p> : null}
         </div>
         <span
-          className={`mt-0.5 h-5 w-5 rounded-full border ${
+          className={`mt-0.5 h-4 w-4 sm:h-5 sm:w-5 rounded-full border ${
             checked ? 'border-finance-charcoal bg-finance-charcoal shadow-[inset_0_0_0_4px_#FFFCF5]' : 'border-finance-line bg-transparent'
           }`}
         />
@@ -483,7 +565,7 @@ export function RadioCard({ checked, label, description, ...props }) {
 }
 
 export function GlassButton({ className = '', ...props }) {
-  return <button {...props} className={`touch-target interactive inline-flex items-center justify-center gap-2 rounded-2xl border border-finance-charcoal bg-finance-charcoal px-4 py-3 text-sm font-medium text-finance-paper ${className}`} />;
+  return <button {...props} className={`touch-target interactive inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-finance-charcoal bg-finance-charcoal px-3.5 sm:px-4 py-2.5 sm:py-3 text-sm font-medium text-finance-paper ${className}`} />;
 }
 
 export function Modal({ open, title, description, children, onClose, maxWidthClassName = 'max-w-md' }) {
@@ -492,20 +574,20 @@ export function Modal({ open, title, description, children, onClose, maxWidthCla
   }
 
   return createPortal(
-    <div className="overlay-backdrop fixed inset-0 z-[60] flex items-end justify-center p-4 md:items-center">
+    <div className="overlay-backdrop fixed inset-0 z-[60] flex items-end justify-center p-0 sm:p-4 md:items-center">
       <button type="button" aria-label="Close modal" className="absolute inset-0" onClick={onClose} />
-      <div className={`overlay-panel relative z-10 max-h-[calc(100vh-2rem)] w-full ${maxWidthClassName} overflow-y-auto p-5 sm:p-6`}>
+      <div className={`overlay-panel relative z-10 max-h-[calc(100vh-2rem)] w-full ${maxWidthClassName} overflow-y-auto rounded-b-none rounded-t-[26px] sm:rounded-[26px] p-4 sm:p-6`}>
         <button
           type="button"
           aria-label="Close modal"
           onClick={onClose}
-          className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-finance-line bg-finance-paper/90 text-finance-text transition hover:bg-finance-cream"
+          className="absolute right-4 top-4 grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full border border-finance-line bg-finance-paper/90 text-finance-text transition hover:bg-finance-cream"
         >
           <X size={18} />
         </button>
-        <div className="mb-5 pr-12">
-          <h3 className="font-display text-xl font-bold tracking-[-0.03em] text-finance-text">{title}</h3>
-          {description ? <p className="mt-2 text-sm leading-6 text-finance-muted">{description}</p> : null}
+        <div className="mb-4 sm:mb-5 pr-10 sm:pr-12">
+          <h3 className="font-display text-lg sm:text-xl font-bold tracking-[-0.03em] text-finance-text">{title}</h3>
+          {description ? <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm leading-5 sm:leading-6 text-finance-muted">{description}</p> : null}
         </div>
         {children}
       </div>
@@ -523,19 +605,19 @@ export function PeriodSelector() {
   }).format(new Date(year, month - 1, 1));
 
   return (
-    <div className="inline-flex items-center gap-1 rounded-xl border border-finance-line bg-finance-paper px-2 py-1.5">
+    <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-lg sm:rounded-xl border border-finance-line bg-finance-paper px-1.5 sm:px-2 py-1 sm:py-1.5">
       <button
         type="button"
         aria-label="Previous month"
         onClick={() => shiftMonth(-1)}
-        className="touch-target interactive grid h-8 w-8 place-items-center rounded-lg text-finance-muted hover:bg-finance-cream hover:text-finance-text"
+        className="touch-target interactive grid h-7 w-7 sm:h-8 sm:w-8 place-items-center rounded-lg text-finance-muted hover:bg-finance-cream hover:text-finance-text"
       >
-        <ChevronLeft size={16} />
+        <ChevronLeft size={14} className="sm:size-[16px]" />
       </button>
       <button
         type="button"
         onClick={goToCurrentMonth}
-        className="interactive rounded-lg px-2 py-1 text-sm font-medium text-finance-text hover:bg-finance-cream"
+        className="interactive rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs sm:text-sm font-medium text-finance-text hover:bg-finance-cream"
       >
         {label}
       </button>
@@ -543,9 +625,9 @@ export function PeriodSelector() {
         type="button"
         aria-label="Next month"
         onClick={() => shiftMonth(1)}
-        className="touch-target interactive grid h-8 w-8 place-items-center rounded-lg text-finance-muted hover:bg-finance-cream hover:text-finance-text"
+        className="touch-target interactive grid h-7 w-7 sm:h-8 sm:w-8 place-items-center rounded-lg text-finance-muted hover:bg-finance-cream hover:text-finance-text"
       >
-        <ChevronRight size={16} />
+        <ChevronRight size={14} className="sm:size-[16px]" />
       </button>
     </div>
   );
