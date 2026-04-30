@@ -20,12 +20,7 @@ const sessionMaxAge = 1000 * 60 * 60 * 24 * sessionTtlDays;
 app.set('trust proxy', 1);
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || frontendUrls.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(null, false);
-    },
+    origin: frontendUrls,
     credentials: true,
   }),
 );
