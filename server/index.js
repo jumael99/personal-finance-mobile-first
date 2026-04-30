@@ -13,14 +13,19 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5002;
-const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+const frontendUrls = (process.env.FRONTEND_URL || 'http://localhost:5173').split(',').map((s) => s.trim());
 const sessionTtlDays = Number(process.env.SESSION_TTL_DAYS || 7);
 const sessionMaxAge = 1000 * 60 * 60 * 24 * sessionTtlDays;
 
 app.set('trust proxy', 1);
 app.use(
   cors({
-    origin: frontendUrl,
+    origin: (origin, callback) => {
+      if (!origin || frontendUrls.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true,
   }),
 );
